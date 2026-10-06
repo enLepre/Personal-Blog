@@ -28,7 +28,9 @@ a:hover{text-decoration:underline;text-underline-offset:4px}
   padding:30px 0 18px;
 }
 .brand{
+  display:block;
   font-size:22px;
+  line-height:1.2;
   letter-spacing:-.02em;
   white-space:nowrap;
 }
@@ -36,7 +38,9 @@ nav{
   display:flex;
   gap:25px;
   font-size:16px;
+  line-height:1.2;
 }
+nav a{display:block}
 .hero{
   min-height:calc(100svh - 140px);
   display:grid;
@@ -146,7 +150,9 @@ nav{
   z-index:300;
   overflow:hidden;
   background:#fff;
+  opacity:1;
   pointer-events:none;
+  will-change:opacity;
 }
 .title-journey-word{
   position:fixed;
