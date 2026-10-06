@@ -39,7 +39,7 @@
     animate left, top, width, font size and line height of one real text node.
     This avoids both stretched glyphs and the undersized/off-centre landing.
   */
-  async function runTitleZoom({ source, target, duration = 720, keepAtEnd = false }) {
+  async function runTitleZoom({ source, target, duration = 950, keepAtEnd = false }) {
     if (!source || !target || reducedMotion.matches) return null;
 
     const sourceRect = source.getBoundingClientRect();
@@ -111,7 +111,7 @@
   async function revealMain(main, movingTitle) {
     const animation = main.animate(
       [{ opacity: 0 }, { opacity: 1 }],
-      { duration: 320, easing: "ease-out", fill: "both" }
+      { duration: 420, easing: "ease-out", fill: "both" }
     );
     try {
       await animation.finished;
@@ -147,7 +147,7 @@
           await runTitleZoom({
             source: currentTitle,
             target: currentMenu,
-            duration: 720
+            duration: 950
           });
         }
       }
@@ -179,7 +179,7 @@
       heldTitle = await runTitleZoom({
         source: clickedMenu,
         target: destinationTitle,
-        duration: 780,
+        duration: 1100,
         keepAtEnd: true
       });
 
