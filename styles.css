@@ -293,3 +293,22 @@ body{
     scroll-margin-top:calc(var(--site-header-height) + 12px);
   }
 }
+
+
+/* Stronger, unmistakable active-section crossfade. */
+.site-header nav a{
+  transition:color .38s ease;
+}
+.site-header nav a::after{
+  color:var(--ink);
+  transition:opacity .38s cubic-bezier(.22,.61,.36,1);
+}
+.site-header nav a.is-active{
+  color:transparent;
+}
+.site-header nav a:not(.is-active)::after{
+  opacity:0;
+}
+.site-header nav a.is-active::after{
+  opacity:1;
+}
