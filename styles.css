@@ -133,29 +133,39 @@ nav{
 }
 
 
-/* Clean, JS-driven word morph. No browser snapshot crossfade is used. */
-.transition-word{
+
+/*
+  Title journey adapted from the News title zoom used in WebsiteTest.
+  The moving word is typeset at every frame (font-size/line-height/width),
+  rather than being geometrically scaled, so it lands exactly on the menu text.
+*/
+.title-journey-overlay{
   position:fixed;
-  z-index:1000;
+  left:0;
+  right:0;
+  z-index:300;
+  overflow:hidden;
+  background:#fff;
+  pointer-events:none;
+}
+.title-journey-word{
+  position:fixed;
+  z-index:700;
   margin:0;
   padding:0;
-  pointer-events:none;
+  overflow-wrap:anywhere;
   white-space:nowrap;
-  color:var(--ink);
+  pointer-events:none;
+  transform-origin:top left;
   background:transparent;
-  text-shadow:none !important;
-  filter:none !important;
-  opacity:1 !important;
-  transform:none;
-  will-change:left,top,font-size,line-height,letter-spacing;
+  text-shadow:none;
+  filter:none;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
+  will-change:left,top,width,font-size,line-height,color;
 }
-.is-transition-hidden{
+.title-journey-hidden{
   visibility:hidden !important;
-}
-.page-content{
-  opacity:1;
 }
 body.is-page-transitioning{
   overflow:hidden;
