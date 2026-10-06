@@ -130,103 +130,39 @@ nav{
   background:rgba(255,255,255,.97);
   color:var(--muted);
   font-size:14px;
-  view-transition-name:site-footer;
 }
 
-/* Cross-document shared-element navigation. */
-@view-transition{
-  navigation:auto;
-}
 
-/* On the incoming page, the clicked menu label becomes the title. */
-html[data-vt-to] .page-title{
-  view-transition-name:section-in;
+/* Clean, JS-driven word morph. No browser snapshot crossfade is used. */
+.transition-word{
+  position:fixed;
+  z-index:1000;
+  margin:0;
+  padding:0;
+  pointer-events:none;
+  white-space:nowrap;
+  color:var(--ink);
+  background:transparent;
+  text-shadow:none !important;
+  filter:none !important;
+  opacity:1 !important;
+  transform:none;
+  will-change:left,top,font-size,line-height,letter-spacing;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
-
-/* The old title collapses into its menu label on the incoming page. */
-html[data-vt-from="research"] [data-section="research"]{view-transition-name:section-out}
-html[data-vt-from="notes"] [data-section="notes"]{view-transition-name:section-out}
-html[data-vt-from="essays"] [data-section="essays"]{view-transition-name:section-out}
-html[data-vt-from="about"] [data-section="about"]{view-transition-name:section-out}
-
-/*
-  Shared-title motion:
-  - the current title shrinks cleanly into its menu label;
-  - only after that does the clicked menu label grow into the new title.
-  We deliberately show only ONE raster for each shared element, which avoids
-  the doubled/ghosted lettering caused by the default View Transition crossfade.
-*/
-::view-transition-group(section-out){
-  animation-duration:520ms;
-  animation-timing-function:cubic-bezier(.42,0,.58,1);
+.is-transition-hidden{
+  visibility:hidden !important;
 }
-::view-transition-old(section-out){
+.page-content{
   opacity:1;
-  animation:none;
-  mix-blend-mode:normal;
 }
-::view-transition-new(section-out){
-  opacity:0;
-  animation:none;
-}
-
-::view-transition-group(section-in){
-  animation-duration:780ms;
-  animation-delay:500ms;
-  animation-timing-function:cubic-bezier(.18,.72,.2,1);
-}
-::view-transition-old(section-in){
-  opacity:0;
-  animation:none;
-}
-::view-transition-new(section-in){
-  opacity:1;
-  animation:none;
-  mix-blend-mode:normal;
-}
-
-/* Fade the surrounding page away, leave the transforming word alone,
-   then bring the new content back only after the title has landed. */
-::view-transition-old(root){
-  animation:root-old-fade 220ms ease 360ms both;
-}
-::view-transition-new(root){
-  animation:root-new-fade 280ms ease 1280ms both;
-}
-::view-transition-group(site-footer){
-  animation:none;
-}
-::view-transition-old(site-footer),
-::view-transition-new(site-footer){
-  opacity:1;
-  animation:none;
-}
-
-@keyframes root-old-fade{
-  from{opacity:1}
-  to{opacity:0}
-}
-@keyframes root-new-fade{
-  from{opacity:0}
-  to{opacity:1}
-}
-
-/* Fallback for browsers without cross-document view transitions. */
-html.no-cross-vt .page-content{
-  transition:opacity 180ms ease;
-}
-html.no-cross-vt body.fallback-leaving .page-content{
-  opacity:0;
+body.is-page-transitioning{
+  overflow:hidden;
 }
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  @view-transition{navigation:none}
-  html.no-cross-vt .page-content,
-  html.no-cross-vt body.fallback-leaving .page-content{
-    opacity:1;
-    transition:none;
-  }
 }
 
 @media(max-width:700px){
@@ -238,22 +174,4 @@ html.no-cross-vt body.fallback-leaving .page-content{
   .landscape{margin-top:50px}
   .page{margin-top:18px}
   .site-footer{padding:11px 0 13px;font-size:13px}
-}
-
-
-/*
-  During a cross-document transition the browser paints a captured copy of the
-  shared word above the live destination document. Hide the live destination
-  title while that captured copy is moving, otherwise the two overlap and look
-  like a large blurred "shadow".
-*/
-html.vt-live-hidden .page-title{
-  visibility:hidden;
-}
-html.vt-live-hidden[data-vt-to="research"] [data-section="research"],
-html.vt-live-hidden[data-vt-to="notes"] [data-section="notes"],
-html.vt-live-hidden[data-vt-to="essays"] [data-section="essays"],
-html.vt-live-hidden[data-vt-to="about"] [data-section="about"],
-html.vt-live-hidden[data-vt-to="home"] [data-section="home"]{
-  visibility:hidden;
 }
