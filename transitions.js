@@ -25,21 +25,39 @@
     return request;
   };
 
+  const waitForLayout = () => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+
+  const prepareMedia = async (root) => {
+    const images = [...root.querySelectorAll("img")];
+    await Promise.all(images.map(async (image) => {
+      image.loading = "eager";
+      try { await image.decode(); } catch (_) {}
+    }));
+    await waitForLayout();
+  };
+
+  const numericLineHeight = (style) => {
+    if (style.lineHeight !== "normal") return style.lineHeight;
+    const size = parseFloat(style.fontSize) || 16;
+    return (size * 1.2) + "px";
+  };
+
   const textFrame = (rect, style) => ({
     left: rect.left + "px",
     top: rect.top + "px",
     width: rect.width + "px",
     fontSize: style.fontSize,
-    lineHeight: style.lineHeight,
+    lineHeight: numericLineHeight(style),
     color: style.color
   });
 
   /*
-    Same typography-driven zoom used by WebsiteTest/news:
-    animate left, top, width, font size and line height of one real text node.
-    This avoids both stretched glyphs and the undersized/off-centre landing.
+    Uses the same typography-based motion as WebsiteTest/news-title-zoom:
+    the browser re-typesets the word at every frame instead of scaling a bitmap.
   */
-  async function runTitleZoom({ source, target, duration = 950, keepAtEnd = false }) {
+  async function runTitleZoom({ source, target, duration, keepAtEnd = false }) {
     if (!source || !target || reducedMotion.matches) return null;
 
     const sourceRect = source.getBoundingClientRect();
@@ -47,11 +65,11 @@
     const sourceStyle = getComputedStyle(source);
     const targetStyle = getComputedStyle(target);
 
-    const title = document.createElement("div");
-    title.className = "title-journey-word";
-    title.textContent = target.textContent.trim();
+    const moving = document.createElement("div");
+    moving.className = "title-journey-word";
+    moving.textContent = target.textContent.trim();
 
-    Object.assign(title.style, {
+    Object.assign(moving.style, {
       fontFamily: targetStyle.fontFamily,
       fontWeight: targetStyle.fontWeight,
       fontStyle: targetStyle.fontStyle,
@@ -60,9 +78,9 @@
 
     source.classList.add("title-journey-hidden");
     target.classList.add("title-journey-hidden");
-    document.body.append(title);
+    document.body.append(moving);
 
-    const animation = title.animate(
+    const animation = moving.animate(
       [textFrame(sourceRect, sourceStyle), textFrame(targetRect, targetStyle)],
       {
         duration,
@@ -71,17 +89,15 @@
       }
     );
 
-    try {
-      await animation.finished;
-    } catch (_) {}
+    try { await animation.finished; } catch (_) {}
 
     if (keepAtEnd) {
       animation.cancel();
-      Object.assign(title.style, textFrame(targetRect, targetStyle));
+      Object.assign(moving.style, textFrame(targetRect, targetStyle));
       return {
-        title,
+        moving,
         release() {
-          title.remove();
+          moving.remove();
           source.classList.remove("title-journey-hidden");
           target.classList.remove("title-journey-hidden");
         }
@@ -89,7 +105,7 @@
     }
 
     animation.cancel();
-    title.remove();
+    moving.remove();
     source.classList.remove("title-journey-hidden");
     target.classList.remove("title-journey-hidden");
     return null;
@@ -100,27 +116,28 @@
     const footer = document.querySelector(".site-footer");
     const overlay = document.createElement("div");
     overlay.className = "title-journey-overlay";
+
     const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
     const footerHeight = footer ? footer.getBoundingClientRect().height : 0;
     overlay.style.top = headerBottom + "px";
     overlay.style.bottom = footerHeight + "px";
+
     document.body.append(overlay);
     return overlay;
   }
 
-  async function revealMain(main, movingTitle) {
-    const animation = main.animate(
-      [{ opacity: 0 }, { opacity: 1 }],
+  async function fadeOverlayAway(overlay, heldTitle) {
+    const fade = overlay.animate(
+      [{ opacity: 1 }, { opacity: 0 }],
       { duration: 420, easing: "ease-out", fill: "both" }
     );
-    try {
-      await animation.finished;
-    } catch (_) {}
-    animation.cancel();
-    main.style.opacity = "1";
+    try { await fade.finished; } catch (_) {}
 
-    // The moving word remains visible until the incoming page is fully revealed.
-    movingTitle?.release();
+    // Swap the animated word for the real title only once the destination
+    // page underneath is completely visible.
+    heldTitle?.release();
+    fade.cancel();
+    overlay.remove();
   }
 
   async function navigate(href, targetSection, push = true) {
@@ -142,7 +159,7 @@
       if (!reducedMotion.matches) {
         overlay = createOverlay();
 
-        // 1) Current page title returns precisely to its own menu label.
+        // Phase 1: current title returns to the exact menu label box.
         if (currentTitle && currentMenu) {
           await runTitleZoom({
             source: currentTitle,
@@ -164,37 +181,46 @@
         currentMain.replaceWith(destinationMain);
         document.body.dataset.page = targetSection;
         if (push) history.pushState({ section: targetSection }, "", href);
-        scrollTo(0, 0);
+        scrollTo({ top: 0, behavior: "instant" });
         return;
       }
 
-      // Prepare the destination in the same viewport geometry as the real page.
+      /*
+        Crucial difference from the previous version:
+        put the destination main into the REAL document before measuring it.
+        That guarantees that the home title is measured in its final grid,
+        viewport and footer geometry, not inside the temporary overlay.
+      */
       destinationMain.style.opacity = "0";
-      overlay.append(destinationMain);
+      currentMain.replaceWith(destinationMain);
+      document.body.dataset.page = targetSection;
+      scrollTo({ top: 0, behavior: "instant" });
+
+      // The homepage title is vertically centred together with its image.
+      // Wait for that image to decode so the measured title position cannot
+      // shift after the animation has already started.
+      await prepareMedia(destinationMain);
 
       const destinationTitle = destinationMain.querySelector(".page-title");
-      if (!clickedMenu || !destinationTitle) throw new Error("Missing title target");
+      const targetMenuNow = document.querySelector('[data-section="' + targetSection + '"]');
+      if (!targetMenuNow || !destinationTitle) throw new Error("Missing title target");
 
-      // 2) Clicked menu label grows into the new page title.
+      // Phase 2: chosen menu label expands to the title's exact FINAL box.
       heldTitle = await runTitleZoom({
-        source: clickedMenu,
+        source: targetMenuNow,
         target: destinationTitle,
         duration: 1100,
         keepAtEnd: true
       });
 
-      // Only after the title has landed do we reveal the rest of the page.
-      await revealMain(destinationMain, heldTitle);
+      // The real destination is already in its final position underneath.
+      destinationMain.style.opacity = "1";
+      await fadeOverlayAway(overlay, heldTitle);
       heldTitle = null;
-
-      destinationMain.style.removeProperty("opacity");
-      currentMain.replaceWith(destinationMain);
-      overlay.remove();
       overlay = null;
 
-      document.body.dataset.page = targetSection;
+      destinationMain.style.removeProperty("opacity");
       if (push) history.pushState({ section: targetSection }, "", href);
-      scrollTo(0, 0);
     } catch (error) {
       console.error(error);
       location.assign(href);
@@ -245,16 +271,19 @@
       const incoming = doc.querySelector("main");
       const currentMain = document.querySelector("main");
       if (!incoming || !currentMain) throw new Error();
-      currentMain.replaceWith(document.importNode(incoming, true));
+
+      const main = document.importNode(incoming, true);
+      currentMain.replaceWith(main);
       document.title = doc.title;
       document.body.dataset.page = section;
-      scrollTo(0, 0);
+      scrollTo({ top: 0, behavior: "instant" });
+      await prepareMedia(main);
     } catch (_) {
       location.reload();
     }
   });
 
-  // Warm likely destinations so the zoom does not pause after the first phase.
+  // Warm likely destinations so there is no pause between the two zoom phases.
   document.querySelectorAll("a[href][data-section]").forEach((link) => {
     const warm = () => loadPage(link.href).catch(() => {});
     link.addEventListener("mouseenter", warm, { once: true });
