@@ -148,22 +148,50 @@ html[data-vt-from="research"] [data-section="research"]{view-transition-name:sec
 html[data-vt-from="notes"] [data-section="notes"]{view-transition-name:section-out}
 html[data-vt-from="essays"] [data-section="essays"]{view-transition-name:section-out}
 html[data-vt-from="about"] [data-section="about"]{view-transition-name:section-out}
-html[data-vt-from="home"] [data-section="home"]{view-transition-name:section-out}
 
+/*
+  Shared-title motion:
+  - the current title shrinks cleanly into its menu label;
+  - only after that does the clicked menu label grow into the new title.
+  We deliberately show only ONE raster for each shared element, which avoids
+  the doubled/ghosted lettering caused by the default View Transition crossfade.
+*/
 ::view-transition-group(section-out){
-  animation-duration:260ms;
-  animation-timing-function:cubic-bezier(.55,.05,.78,.2);
+  animation-duration:520ms;
+  animation-timing-function:cubic-bezier(.42,0,.58,1);
 }
+::view-transition-old(section-out){
+  opacity:1;
+  animation:none;
+  mix-blend-mode:normal;
+}
+::view-transition-new(section-out){
+  opacity:0;
+  animation:none;
+}
+
 ::view-transition-group(section-in){
-  animation-duration:430ms;
-  animation-delay:250ms;
-  animation-timing-function:cubic-bezier(.18,.78,.22,1);
+  animation-duration:780ms;
+  animation-delay:500ms;
+  animation-timing-function:cubic-bezier(.18,.72,.2,1);
 }
+::view-transition-old(section-in){
+  opacity:0;
+  animation:none;
+}
+::view-transition-new(section-in){
+  opacity:1;
+  animation:none;
+  mix-blend-mode:normal;
+}
+
+/* Fade the surrounding page away, leave the transforming word alone,
+   then bring the new content back only after the title has landed. */
 ::view-transition-old(root){
-  animation:root-old-fade 180ms ease 650ms both;
+  animation:root-old-fade 220ms ease 360ms both;
 }
 ::view-transition-new(root){
-  animation:root-new-fade 260ms ease 650ms both;
+  animation:root-new-fade 280ms ease 1280ms both;
 }
 ::view-transition-group(site-footer){
   animation:none;
