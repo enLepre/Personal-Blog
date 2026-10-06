@@ -1,10 +1,19 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Essays — Enrico Lepre</title><link rel="stylesheet" href="styles.css"><script>document.documentElement.classList.add("js")</script><script defer src="transitions.js"></script></head>
-<body>
-<header class="site-header shell"><a class="brand" href="index.html">Enrico Lepre</a><nav aria-label="Main navigation"><a href="research.html">Research</a><a href="notes.html">Notes</a><a href="essays.html">Essays</a><a href="about.html">About</a></nav></header>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Essays — Enrico Lepre</title><link rel="stylesheet" href="styles.css"><script>
+    document.documentElement.classList.add("js");
+    try {
+      const t = JSON.parse(sessionStorage.getItem("sectionTransition") || "null");
+      if (t && t.to) {
+        document.documentElement.dataset.vtFrom = t.from || "";
+        document.documentElement.dataset.vtTo = t.to;
+      }
+    } catch (_) {}
+  </script><script defer src="transitions.js"></script></head>
+<body data-page="essays">
+<header class="site-header shell"><a class="brand" data-section="home" href="index.html">Enrico Lepre</a><nav aria-label="Main navigation"><a data-section="research" href="research.html">Research</a><a data-section="notes" href="notes.html">Notes</a><a data-section="essays" href="essays.html">Essays</a><a data-section="about" href="about.html">About</a></nav></header>
 <main class="page">
-  <h1 class="page-title">Essays</h1>
+  <h1 class="page-title" data-section-title="essays">Essays</h1>
   <div class="page-content">
     <p class="lead">Longer pieces about science, research and whatever seems worth thinking through properly.</p>
     <section class="item"><h2>First essay</h2><p>The essays will appear here as they are published. The site is deliberately not organized as a chronological news feed.</p></section>
