@@ -1,13 +1,16 @@
 :root{
-  --ink:#111;
+  --ink:#111111;
   --muted:#6f6f6f;
-  --paper:#fff;
+  --hairline:#e7e7e7;
+  --paper:#ffffff;
   --max:1120px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
   margin:0;
+  min-height:100svh;
+  padding-bottom:58px;
   background:var(--paper);
   color:var(--ink);
   font-family:Georgia,"Times New Roman",serif;
@@ -17,7 +20,6 @@ body{
 a{color:inherit;text-decoration:none}
 a:hover{text-decoration:underline;text-underline-offset:4px}
 .shell{width:min(calc(100% - 48px),var(--max));margin:0 auto}
-
 .site-header{
   display:flex;
   align-items:center;
@@ -26,7 +28,9 @@ a:hover{text-decoration:underline;text-underline-offset:4px}
   padding:30px 0 18px;
 }
 .brand{
+  display:block;
   font-size:22px;
+  line-height:1.2;
   letter-spacing:-.02em;
   white-space:nowrap;
 }
@@ -34,136 +38,156 @@ nav{
   display:flex;
   gap:25px;
   font-size:16px;
+  line-height:1.2;
 }
-
-.sticky-statement{
-  position:sticky;
-  top:0;
-  z-index:20;
-  background:rgba(255,255,255,.96);
-  backdrop-filter:blur(8px);
-}
-.sticky-statement .shell{
-  padding:10px 0 14px;
-  color:#525252;
-  font-size:clamp(18px,2.1vw,27px);
-  line-height:1.4;
-  text-align:center;
-}
-
+nav a{display:block}
 .hero{
-  min-height:calc(100svh - 130px);
+  min-height:calc(100svh - 140px);
   display:grid;
   place-items:center;
   text-align:center;
-  padding:42px 0 84px;
+  padding:34px 0 58px;
 }
 .hero-inner{width:min(860px,100%)}
-.hero h1{
+.hero .page-title{
   margin:0;
   font-size:clamp(58px,9vw,104px);
   line-height:.95;
   letter-spacing:-.055em;
   font-weight:400;
 }
+.tagline{
+  max-width:720px;
+  margin:28px auto 0;
+  color:#525252;
+  font-size:clamp(20px,2.25vw,28px);
+  line-height:1.46;
+}
 .landscape{
   display:block;
   width:min(560px,86vw);
   height:auto;
-  margin:66px auto 0;
+  margin:62px auto 0;
 }
-
-.home-preview{
-  padding:92px 0 104px;
-}
-.home-preview-heading{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  gap:24px;
-  margin-bottom:44px;
-}
-.home-preview-heading h2{
-  margin:0;
-  font-size:clamp(42px,6vw,72px);
-  line-height:1;
-  letter-spacing:-.04em;
-  font-weight:400;
-}
-.more-link{
-  padding-bottom:8px;
-  color:var(--muted);
-  font-size:14px;
-}
-.preview-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:56px;
-}
-.preview-grid h3{
-  margin:0 0 12px;
-  font-size:25px;
-  line-height:1.15;
-  font-weight:400;
-}
-.preview-grid p{
-  margin:0;
-  color:var(--muted);
-  font-size:16px;
-  line-height:1.65;
-}
-
 .page{
   width:min(calc(100% - 48px),800px);
-  margin:28px auto 110px;
+  margin:26px auto 96px;
 }
-.page h1{
-  margin:0 0 34px;
+.page .page-title{
+  margin:0 0 36px;
   font-size:clamp(50px,7vw,78px);
   line-height:1;
   letter-spacing:-.04em;
   font-weight:400;
 }
 .lead{
-  margin:0 0 72px;
-  color:#383838;
+  margin:0 0 66px;
   font-size:clamp(21px,3vw,28px);
   line-height:1.52;
+  color:#383838;
 }
-.page-items{
-  display:grid;
-  gap:58px;
+.item{
+  padding:28px 0 30px;
+  border-top:1px solid var(--hairline);
 }
-.page-item h2{
-  margin:0 0 10px;
-  font-size:28px;
+.item h2{
+  margin:0 0 8px;
+  font-size:25px;
   font-weight:400;
   letter-spacing:-.015em;
 }
-.page-item p{
+.item p{
   margin:0;
   color:var(--muted);
   font-size:17px;
   line-height:1.65;
 }
-
-.site-footer{
-  padding:30px 0 40px;
+.note-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  border-top:1px solid var(--hairline);
+}
+.note-list li{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:24px;
+  padding:22px 0;
+  border-bottom:1px solid var(--hairline);
+}
+.note-list span:last-child{
   color:var(--muted);
   font-size:14px;
 }
 
-@media(max-width:800px){
-  .shell{width:min(calc(100% - 32px),var(--max))}
-  .site-header{align-items:flex-start;gap:18px;padding-top:22px}
+/* Always anchored to the viewport: it never participates in page movement. */
+.site-footer{
+  position:fixed;
+  left:50%;
+  bottom:0;
+  z-index:200;
+  width:min(calc(100% - 48px),var(--max));
+  transform:translateX(-50%);
+  margin:0;
+  padding:13px 0 16px;
+  border-top:1px solid var(--hairline);
+  background:rgba(255,255,255,.97);
+  color:var(--muted);
+  font-size:14px;
+}
+
+
+
+/*
+  Title journey adapted from the News title zoom used in WebsiteTest.
+  The moving word is typeset at every frame (font-size/line-height/width),
+  rather than being geometrically scaled, so it lands exactly on the menu text.
+*/
+.title-journey-overlay{
+  position:fixed;
+  left:0;
+  right:0;
+  z-index:300;
+  overflow:hidden;
+  background:#fff;
+  opacity:1;
+  pointer-events:none;
+  will-change:opacity;
+}
+.title-journey-word{
+  position:fixed;
+  z-index:700;
+  margin:0;
+  padding:0;
+  overflow-wrap:anywhere;
+  white-space:nowrap;
+  pointer-events:none;
+  transform-origin:top left;
+  background:transparent;
+  text-shadow:none;
+  filter:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  will-change:left,top,width,font-size,line-height,color;
+}
+.title-journey-hidden{
+  visibility:hidden !important;
+}
+body.is-page-transitioning{
+  overflow:hidden;
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+}
+
+@media(max-width:700px){
+  body{padding-bottom:54px}
+  .site-header{align-items:flex-start;gap:18px}
   .brand{font-size:20px}
   nav{gap:12px;flex-wrap:wrap;justify-content:flex-end;font-size:14px}
-  .sticky-statement .shell{padding:8px 0 12px;text-align:left}
-  .hero{min-height:auto;padding:54px 0 74px}
+  .hero{padding-top:20px}
   .landscape{margin-top:50px}
-  .home-preview{padding:64px 0 74px}
-  .home-preview-heading{align-items:flex-start}
-  .preview-grid{grid-template-columns:1fr;gap:36px}
   .page{margin-top:18px}
-  .page-items{gap:44px}
+  .site-footer{padding:11px 0 13px;font-size:13px}
 }
