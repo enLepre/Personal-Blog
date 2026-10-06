@@ -1,9 +1,7 @@
 (() => {
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const cache = new Map();
-  let running = false;
-
-  const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+  let busy = false;
 
   const sectionFromPath = (pathname) => {
     const file = pathname.split("/").pop() || "index.html";
@@ -14,130 +12,124 @@
     return "home";
   };
 
-  const fetchPage = async (url) => {
-    const key = new URL(url, window.location.href).href;
-    if (cache.has(key)) return cache.get(key);
-    const promise = fetch(key, { credentials: "same-origin" })
+  const loadPage = async (href) => {
+    const url = new URL(href, location.href).href;
+    if (cache.has(url)) return cache.get(url);
+    const request = fetch(url, { cache: "no-cache", credentials: "same-origin" })
       .then((response) => {
-        if (!response.ok) throw new Error("Page fetch failed: " + response.status);
+        if (!response.ok) throw new Error("Page unavailable");
         return response.text();
       })
       .then((html) => new DOMParser().parseFromString(html, "text/html"));
-    cache.set(key, promise);
-    return promise;
+    cache.set(url, request);
+    return request;
   };
 
-  const rectStyle = (el) => {
-    const rect = el.getBoundingClientRect();
-    const cs = getComputedStyle(el);
-    return {
-      rect,
-      fontFamily: cs.fontFamily,
-      fontSize: cs.fontSize,
-      fontWeight: cs.fontWeight,
-      fontStyle: cs.fontStyle,
-      lineHeight: cs.lineHeight === "normal" ? cs.fontSize : cs.lineHeight,
-      letterSpacing: cs.letterSpacing === "normal" ? "0px" : cs.letterSpacing,
-      color: cs.color
-    };
-  };
+  const textFrame = (rect, style) => ({
+    left: rect.left + "px",
+    top: rect.top + "px",
+    width: rect.width + "px",
+    fontSize: style.fontSize,
+    lineHeight: style.lineHeight,
+    color: style.color
+  });
 
-  const createMovingWord = (text, source) => {
-    const s = rectStyle(source);
-    const word = document.createElement("div");
-    word.className = "transition-word";
-    word.textContent = text;
-    Object.assign(word.style, {
-      left: s.rect.left + "px",
-      top: s.rect.top + "px",
-      fontFamily: s.fontFamily,
-      fontSize: s.fontSize,
-      fontWeight: s.fontWeight,
-      fontStyle: s.fontStyle,
-      lineHeight: s.lineHeight,
-      letterSpacing: s.letterSpacing,
-      color: s.color
+  /*
+    Same typography-driven zoom used by WebsiteTest/news:
+    animate left, top, width, font size and line height of one real text node.
+    This avoids both stretched glyphs and the undersized/off-centre landing.
+  */
+  async function runTitleZoom({ source, target, duration = 720, keepAtEnd = false }) {
+    if (!source || !target || reducedMotion.matches) return null;
+
+    const sourceRect = source.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const sourceStyle = getComputedStyle(source);
+    const targetStyle = getComputedStyle(target);
+
+    const title = document.createElement("div");
+    title.className = "title-journey-word";
+    title.textContent = target.textContent.trim();
+
+    Object.assign(title.style, {
+      fontFamily: targetStyle.fontFamily,
+      fontWeight: targetStyle.fontWeight,
+      fontStyle: targetStyle.fontStyle,
+      letterSpacing: targetStyle.letterSpacing === "normal" ? "0px" : targetStyle.letterSpacing
     });
-    document.body.appendChild(word);
-    return word;
-  };
 
-  const morph = async (text, fromEl, toEl, duration) => {
-    if (!fromEl || !toEl) return;
-    const start = rectStyle(fromEl);
-    const end = rectStyle(toEl);
-    const word = createMovingWord(text, fromEl);
+    source.classList.add("title-journey-hidden");
+    target.classList.add("title-journey-hidden");
+    document.body.append(title);
 
-    fromEl.classList.add("is-transition-hidden");
-    toEl.classList.add("is-transition-hidden");
-
-    const animation = word.animate([
+    const animation = title.animate(
+      [textFrame(sourceRect, sourceStyle), textFrame(targetRect, targetStyle)],
       {
-        left: start.rect.left + "px",
-        top: start.rect.top + "px",
-        fontSize: start.fontSize,
-        lineHeight: start.lineHeight,
-        letterSpacing: start.letterSpacing
-      },
-      {
-        left: end.rect.left + "px",
-        top: end.rect.top + "px",
-        fontSize: end.fontSize,
-        lineHeight: end.lineHeight,
-        letterSpacing: end.letterSpacing
+        duration,
+        easing: "cubic-bezier(.22,1,.36,1)",
+        fill: "both"
       }
-    ], {
-      duration,
-      easing: "cubic-bezier(.22,.72,.22,1)",
-      fill: "forwards"
-    });
+    );
 
-    try { await animation.finished; } catch (_) {}
+    try {
+      await animation.finished;
+    } catch (_) {}
 
-    word.remove();
-    fromEl.classList.remove("is-transition-hidden");
-    toEl.classList.remove("is-transition-hidden");
-  };
+    if (keepAtEnd) {
+      animation.cancel();
+      Object.assign(title.style, textFrame(targetRect, targetStyle));
+      return {
+        title,
+        release() {
+          title.remove();
+          source.classList.remove("title-journey-hidden");
+          target.classList.remove("title-journey-hidden");
+        }
+      };
+    }
 
-  const fadeOut = async (el, duration = 220) => {
-    if (!el) return;
-    const a = el.animate([{opacity:1},{opacity:0}], {
-      duration,
-      easing:"ease",
-      fill:"forwards"
-    });
-    try { await a.finished; } catch (_) {}
-  };
+    animation.cancel();
+    title.remove();
+    source.classList.remove("title-journey-hidden");
+    target.classList.remove("title-journey-hidden");
+    return null;
+  }
 
-  const fadeIn = async (el, duration = 300) => {
-    if (!el) return;
-    el.style.opacity = "0";
-    const a = el.animate([{opacity:0},{opacity:1}], {
-      duration,
-      easing:"ease",
-      fill:"forwards"
-    });
-    try { await a.finished; } catch (_) {}
-    el.style.opacity = "";
-  };
+  function createOverlay() {
+    const header = document.querySelector(".site-header");
+    const footer = document.querySelector(".site-footer");
+    const overlay = document.createElement("div");
+    overlay.className = "title-journey-overlay";
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+    const footerHeight = footer ? footer.getBoundingClientRect().height : 0;
+    overlay.style.top = headerBottom + "px";
+    overlay.style.bottom = footerHeight + "px";
+    document.body.append(overlay);
+    return overlay;
+  }
 
-  const replaceMain = (doc, targetSection) => {
-    const incoming = doc.querySelector("main");
-    const current = document.querySelector("main");
-    if (!incoming || !current) throw new Error("Missing main element");
+  async function revealMain(main, movingTitle) {
+    const animation = main.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 320, easing: "ease-out", fill: "both" }
+    );
+    try {
+      await animation.finished;
+    } catch (_) {}
+    animation.cancel();
+    main.style.opacity = "1";
 
-    const clone = document.importNode(incoming, true);
-    current.replaceWith(clone);
-    document.title = doc.title;
-    document.body.dataset.page = targetSection;
-    window.scrollTo(0, 0);
-    return clone;
-  };
+    // The moving word remains visible until the incoming page is fully revealed.
+    movingTitle?.release();
+  }
 
-  const navigate = async (url, targetSection, {push = true, animate = true} = {}) => {
-    if (running) return;
-    running = true;
+  async function navigate(href, targetSection, push = true) {
+    if (busy) return;
+    busy = true;
     document.body.classList.add("is-page-transitioning");
+
+    let overlay;
+    let heldTitle;
 
     try {
       const currentSection = document.body.dataset.page || "home";
@@ -145,43 +137,74 @@
       const currentMenu = document.querySelector('[data-section="' + currentSection + '"]');
       const clickedMenu = document.querySelector('[data-section="' + targetSection + '"]');
 
-      const nextDocPromise = fetchPage(url);
+      const destinationPromise = loadPage(href);
 
-      if (animate && !reduceMotion.matches && currentTitle && currentMenu) {
-        await morph(currentTitle.textContent.trim(), currentTitle, currentMenu, 720);
+      if (!reducedMotion.matches) {
+        overlay = createOverlay();
+
+        // 1) Current page title returns precisely to its own menu label.
+        if (currentTitle && currentMenu) {
+          await runTitleZoom({
+            source: currentTitle,
+            target: currentMenu,
+            duration: 720
+          });
+        }
       }
 
-      const oldContent = document.querySelector(".page-content");
-      if (animate && !reduceMotion.matches) {
-        await fadeOut(oldContent, 220);
+      const doc = await destinationPromise;
+      const incoming = doc.querySelector("main");
+      const currentMain = document.querySelector("main");
+      if (!incoming || !currentMain) throw new Error("Invalid destination page");
+
+      const destinationMain = document.importNode(incoming, true);
+      document.title = doc.title;
+
+      if (reducedMotion.matches) {
+        currentMain.replaceWith(destinationMain);
+        document.body.dataset.page = targetSection;
+        if (push) history.pushState({ section: targetSection }, "", href);
+        scrollTo(0, 0);
+        return;
       }
 
-      const nextDoc = await nextDocPromise;
-      const newMain = replaceMain(nextDoc, targetSection);
-      const newTitle = newMain.querySelector(".page-title");
-      const newContent = newMain.querySelector(".page-content");
-      if (newContent) newContent.style.opacity = "0";
+      // Prepare the destination in the same viewport geometry as the real page.
+      destinationMain.style.opacity = "0";
+      overlay.append(destinationMain);
 
-      if (push) history.pushState({section:targetSection}, "", url);
+      const destinationTitle = destinationMain.querySelector(".page-title");
+      if (!clickedMenu || !destinationTitle) throw new Error("Missing title target");
 
-      const targetMenuNow = document.querySelector('[data-section="' + targetSection + '"]');
+      // 2) Clicked menu label grows into the new page title.
+      heldTitle = await runTitleZoom({
+        source: clickedMenu,
+        target: destinationTitle,
+        duration: 780,
+        keepAtEnd: true
+      });
 
-      if (animate && !reduceMotion.matches && targetMenuNow && newTitle) {
-        await wait(90);
-        await morph(targetMenuNow.textContent.trim(), targetMenuNow, newTitle, 980);
-        await fadeIn(newContent, 320);
-      } else {
-        if (newContent) newContent.style.opacity = "";
-      }
+      // Only after the title has landed do we reveal the rest of the page.
+      await revealMain(destinationMain, heldTitle);
+      heldTitle = null;
+
+      destinationMain.style.removeProperty("opacity");
+      currentMain.replaceWith(destinationMain);
+      overlay.remove();
+      overlay = null;
+
+      document.body.dataset.page = targetSection;
+      if (push) history.pushState({ section: targetSection }, "", href);
+      scrollTo(0, 0);
     } catch (error) {
       console.error(error);
-      window.location.href = url;
-      return;
+      location.assign(href);
     } finally {
+      heldTitle?.release();
+      overlay?.remove();
       document.body.classList.remove("is-page-transitioning");
-      running = false;
+      busy = false;
     }
-  };
+  }
 
   document.addEventListener("click", (event) => {
     const link = event.target.closest("a[href][data-section]");
@@ -192,12 +215,12 @@
       event.metaKey ||
       event.ctrlKey ||
       event.shiftKey ||
-      event.altKey
+      event.altKey ||
+      (link.target && link.target !== "_self")
     ) return;
-    if (link.target && link.target !== "_self") return;
 
-    const url = new URL(link.href, window.location.href);
-    if (url.origin !== window.location.origin) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return;
 
     const targetSection = link.dataset.section || sectionFromPath(url.pathname);
     const currentSection = document.body.dataset.page || "home";
@@ -207,22 +230,34 @@
     }
 
     event.preventDefault();
-    navigate(url.href, targetSection, {push:true, animate:true});
+    navigate(url.href, targetSection, true);
   });
 
-  window.addEventListener("popstate", () => {
-    const section = sectionFromPath(window.location.pathname);
-    navigate(window.location.href, section, {push:false, animate:false});
+  window.addEventListener("popstate", async () => {
+    if (busy) {
+      location.reload();
+      return;
+    }
+
+    const section = sectionFromPath(location.pathname);
+    try {
+      const doc = await loadPage(location.href);
+      const incoming = doc.querySelector("main");
+      const currentMain = document.querySelector("main");
+      if (!incoming || !currentMain) throw new Error();
+      currentMain.replaceWith(document.importNode(incoming, true));
+      document.title = doc.title;
+      document.body.dataset.page = section;
+      scrollTo(0, 0);
+    } catch (_) {
+      location.reload();
+    }
   });
 
-  window.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("a[href][data-section]").forEach((link) => {
-      const url = new URL(link.href, window.location.href);
-      if (url.origin === window.location.origin) {
-        const preload = () => fetchPage(url.href).catch(() => {});
-        link.addEventListener("mouseenter", preload, {once:true});
-        link.addEventListener("focus", preload, {once:true});
-      }
-    });
+  // Warm likely destinations so the zoom does not pause after the first phase.
+  document.querySelectorAll("a[href][data-section]").forEach((link) => {
+    const warm = () => loadPage(link.href).catch(() => {});
+    link.addEventListener("mouseenter", warm, { once: true });
+    link.addEventListener("focus", warm, { once: true });
   });
 })();
