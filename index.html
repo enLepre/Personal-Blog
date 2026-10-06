@@ -10,12 +10,12 @@
 </head>
 <body id="top" data-page="home">
   <header class="site-header shell">
-    <a class="brand" href="#top">Enrico Lepre</a>
+    <a class="brand" href="#top" data-nav="home">Enrico Lepre</a>
     <nav aria-label="Main navigation">
-      <a href="#research">Research</a>
-      <a href="#notes">Notes</a>
-      <a href="#essays">Essays</a>
-      <a href="#about">About</a>
+      <a href="#research" data-nav="research" data-label="Research">Research</a>
+      <a href="#notes" data-nav="notes" data-label="Notes">Notes</a>
+      <a href="#essays" data-nav="essays" data-label="Essays">Essays</a>
+      <a href="#about" data-nav="about" data-label="About">About</a>
     </nav>
   </header>
 
@@ -75,5 +75,58 @@
   </main>
 
   <footer class="site-footer">Enrico Lepre · personal academic notebook</footer>
+
+<script>
+(() => {
+  const links = [...document.querySelectorAll('.site-header [data-nav]')];
+  const sections = [
+    { id: 'home', el: document.querySelector('.hero') },
+    { id: 'research', el: document.getElementById('research') },
+    { id: 'notes', el: document.getElementById('notes') },
+    { id: 'essays', el: document.getElementById('essays') },
+    { id: 'about', el: document.getElementById('about') }
+  ].filter(item => item.el);
+
+  const setActive = (id) => {
+    links.forEach(link => {
+      const active = link.dataset.nav === id;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  };
+
+  const update = () => {
+    const marker = Math.min(window.innerHeight * 0.34, 260);
+    let active = 'home';
+
+    for (const section of sections) {
+      const rect = section.el.getBoundingClientRect();
+      if (rect.top <= marker && rect.bottom > marker) {
+        active = section.id;
+        break;
+      }
+      if (rect.top <= marker) active = section.id;
+    }
+
+    setActive(active);
+  };
+
+  let ticking = false;
+  const requestUpdate = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      update();
+      ticking = false;
+    });
+  };
+
+  window.addEventListener('scroll', requestUpdate, { passive: true });
+  window.addEventListener('resize', requestUpdate);
+  window.addEventListener('load', update);
+  update();
+})();
+</script>
 </body>
 </html>
