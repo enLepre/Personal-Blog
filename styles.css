@@ -191,3 +191,29 @@ body.is-page-transitioning{
   .page{margin-top:18px}
   .site-footer{padding:11px 0 13px;font-size:13px}
 }
+
+
+/* One-page homepage: reuse the existing page aesthetic without restyling it. */
+.home-section{
+  min-height:calc(100svh - 86px);
+  padding-top:28px;
+  padding-bottom:96px;
+  scroll-margin-top:18px;
+}
+.home-section .page-title{
+  margin:0 0 36px;
+  font-size:clamp(50px,7vw,78px);
+  line-height:1;
+  letter-spacing:-.04em;
+  font-weight:400;
+}
+#top{scroll-margin-top:0}
+
+@media(max-width:700px){
+  .home-section{
+    min-height:auto;
+    padding-top:18px;
+    padding-bottom:82px;
+    scroll-margin-top:10px;
+  }
+}
