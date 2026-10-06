@@ -19,8 +19,19 @@
 
   window.addEventListener("pagereveal", (event) => {
     if (event.viewTransition) {
-      event.viewTransition.finished.finally(clearIncomingState);
+      /*
+        pagereveal fires after the transition snapshots exist. At this point we
+        can hide the live title/menu label without affecting the captured image
+        that is doing the actual movement.
+      */
+      document.documentElement.classList.add("vt-live-hidden");
+
+      event.viewTransition.finished.finally(() => {
+        document.documentElement.classList.remove("vt-live-hidden");
+        clearIncomingState();
+      });
     } else {
+      document.documentElement.classList.remove("vt-live-hidden");
       window.setTimeout(clearIncomingState, 0);
     }
   });
@@ -29,6 +40,7 @@
     if (!("onpagereveal" in window) || event.persisted) {
       window.setTimeout(clearIncomingState, 0);
     }
+    document.documentElement.classList.remove("vt-live-hidden");
     document.body?.classList.remove("fallback-leaving");
   });
 
