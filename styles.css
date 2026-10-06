@@ -217,3 +217,79 @@ body.is-page-transitioning{
     scroll-margin-top:10px;
   }
 }
+
+
+/* Persistent top navigation and smooth active-section emphasis. */
+:root{
+  --site-header-height:74px;
+}
+
+body{
+  padding-top:var(--site-header-height);
+}
+
+.site-header{
+  position:fixed;
+  top:0;
+  left:50%;
+  z-index:500;
+  width:min(calc(100% - 48px),var(--max));
+  transform:translateX(-50%);
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+.site-header nav a{
+  position:relative;
+  color:var(--ink);
+  font-weight:400;
+  transition:color .32s ease;
+}
+
+/* A bold copy is faded in above the regular label, avoiding layout shift
+   and making the change of section feel continuous rather than abrupt. */
+.site-header nav a::after{
+  content:attr(data-label);
+  position:absolute;
+  inset:0;
+  font-weight:700;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .34s cubic-bezier(.22,.61,.36,1);
+}
+
+.site-header nav a.is-active::after{
+  opacity:1;
+}
+
+.site-header nav a.is-active{
+  text-decoration:none;
+}
+
+.site-header .brand{
+  transition:font-weight .28s ease, opacity .28s ease;
+}
+
+.site-header .brand.is-active{
+  font-weight:700;
+}
+
+.hero,
+.home-section{
+  scroll-margin-top:calc(var(--site-header-height) + 18px);
+}
+
+@media(max-width:700px){
+  :root{--site-header-height:68px}
+  body{padding-top:var(--site-header-height)}
+  .site-header{
+    width:min(calc(100% - 32px),var(--max));
+    padding-top:18px;
+    padding-bottom:14px;
+  }
+  .hero,
+  .home-section{
+    scroll-margin-top:calc(var(--site-header-height) + 12px);
+  }
+}
