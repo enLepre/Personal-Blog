@@ -239,3 +239,21 @@ html.no-cross-vt body.fallback-leaving .page-content{
   .page{margin-top:18px}
   .site-footer{padding:11px 0 13px;font-size:13px}
 }
+
+
+/*
+  During a cross-document transition the browser paints a captured copy of the
+  shared word above the live destination document. Hide the live destination
+  title while that captured copy is moving, otherwise the two overlap and look
+  like a large blurred "shadow".
+*/
+html.vt-live-hidden .page-title{
+  visibility:hidden;
+}
+html.vt-live-hidden[data-vt-to="research"] [data-section="research"],
+html.vt-live-hidden[data-vt-to="notes"] [data-section="notes"],
+html.vt-live-hidden[data-vt-to="essays"] [data-section="essays"],
+html.vt-live-hidden[data-vt-to="about"] [data-section="about"],
+html.vt-live-hidden[data-vt-to="home"] [data-section="home"]{
+  visibility:hidden;
+}
