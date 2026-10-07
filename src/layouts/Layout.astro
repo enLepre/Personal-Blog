@@ -1,0 +1,28 @@
+---
+import '../styles/global.css';
+const { section = 'home' } = Astro.props;
+const home = section === 'home';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="generator" content={Astro.generator} />
+  <title>{home ? 'Enrico Lepre' : `${section[0].toUpperCase() + section.slice(1)} — Enrico Lepre`}</title>
+  <meta name="description" content="Research, notes and essays by Enrico Lepre." />
+</head>
+<body id="top" data-page={section}>
+  <header class="site-header shell">
+    <a class="brand" href={home ? '#top' : `${base}/#top`} data-nav="home">Enrico Lepre</a>
+    <nav aria-label="Main navigation">
+      {['research', 'notes', 'essays', 'about'].map(id => <a href={home ? `#${id}` : `${base}/#${id}`} data-nav={id} data-label={id[0].toUpperCase() + id.slice(1)} class:list={{ 'is-active': !home && id === section }} aria-current={!home && id === section ? 'page' : undefined}>{id[0].toUpperCase() + id.slice(1)}</a>)}
+    </nav>
+  </header>
+  <slot />
+  <footer class="site-footer">Enrico Lepre · personal academic notebook</footer>
+  <script>import '../scripts/navigation.js';</script>
+</body>
+</html>

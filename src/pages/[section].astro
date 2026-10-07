@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionContent from '../components/SectionContent.astro';
+export function getStaticPaths() {
+  return ['research', 'notes', 'essays', 'about'].map(section => ({ params: { section } }));
+}
+const { section } = Astro.params;
+---
+<Layout section={section}>
+  <main class="page">
+    <h1 class="page-title">{section[0].toUpperCase() + section.slice(1)}</h1>
+    <div class="page-content"><SectionContent section={section} /></div>
+  </main>
+</Layout>

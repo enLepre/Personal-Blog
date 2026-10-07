@@ -1,0 +1,16 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import { newestFirst } from '../lib/sort.mjs';
+const { section } = Astro.props;
+const intro = await getEntry('sections', section);
+if (!intro) throw new Error(`Missing section: ${section}`);
+const entries = section === 'about' ? [] : newestFirst(await getCollection(section));
+const { Content: About } = await render(intro);
+const rendered = await Promise.all(entries.map(async (entry) => ({ entry, ...(await render(entry)) })));
+---
+<p class="lead">{intro.data.lead}</p>
+{section === 'about' ? <div class="about-content"><About /></div> : section === 'notes' ? (
+  <ul class="note-list">
+    {rendered.map(({ entry, Content }) => <li data-date={entry.data.date.toISOString()}><span>{entry.data.title}{entry.body?.trim() && <Content />}</span><span>{entry.data.status}</span></li>)}
+  </ul>
+) : rendered.map(({ entry, Content }) => <section class="item" data-date={entry.data.date.toISOString()}><h2>{entry.data.title}</h2><Content /></section>)}

@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionContent from '../components/SectionContent.astro';
+---
+<Layout>
+  <main>
+    <section class="hero shell" aria-labelledby="home-title">
+      <div class="hero-inner">
+        <h1 class="page-title" id="home-title">Enrico Lepre</h1>
+        <div class="page-content">
+          <p class="tagline">Chemistry at the interface of materials and fields</p>
+          <img class="landscape" src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/assets/landscape.webp`} alt="Mountain landscape with a handwritten note">
+        </div>
+      </div>
+    </section>
+    {['research', 'notes', 'essays', 'about'].map(section => <section class="page home-section" id={section} aria-labelledby={`${section}-title`}>
+      <h1 class="page-title" id={`${section}-title`}>{section[0].toUpperCase() + section.slice(1)}</h1>
+      <div class="page-content"><SectionContent section={section} /></div>
+    </section>)}
+  </main>
+</Layout>
