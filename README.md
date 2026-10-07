@@ -23,3 +23,12 @@ The homepage remains scrollable, with a fixed header and the original active-lab
 ## Publish
 
 Every push to `main` runs `.github/workflows/pages.yml`: install from the lockfile, test, build Astro, upload only `dist`, deploy to GitHub Pages. A manual workflow run is also supported. The existing branch-based Pages configuration is supported: the Astro deployment waits for any legacy build of the same commit to finish before publishing, preventing it from overwriting the built site. Switching Pages to **GitHub Actions** removes that redundant legacy build.
+
+## Individual article pages
+
+Every Markdown entry in Research, Notes and Essays generates its own URL:
+`/Personal-Blog/<collection>/<filename-without-md>.html`.
+Click its title from the homepage or section page to read it separately.
+The section Markdown files have their existing `research.html`, `notes.html`,
+`essays.html` and `about.html` pages. Section titles on the homepage link to them.
+Paragraph spacing and justification are shared between previews and full articles.

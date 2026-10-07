@@ -312,3 +312,24 @@ body{
 .site-header nav a.is-active::after{
   opacity:1;
 }
+
+/* Shared Markdown typography on the homepage and individual pages. */
+.prose p {
+  margin: 0 0 1.25em;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.75;
+  text-align: justify;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.prose p:last-child { margin-bottom: 0; }
+.prose img { max-width: 100%; height: auto; }
+.prose pre { overflow-x: auto; }
+.back-link {
+  display: inline-block;
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 16px;
+}
+.article-page { padding-top: 28px; }
