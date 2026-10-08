@@ -5,4 +5,3 @@ publications: true
 date: 2026-10-05
 ---
 
-My published work in chemistry, materials and catalysis.
