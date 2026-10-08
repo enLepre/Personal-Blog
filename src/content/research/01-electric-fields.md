@@ -4,7 +4,7 @@ date: 2026-10-05
 preview: "What does it mean to tune reactivity with external stimuli?"
 ---
 
-Chemistry is the world of electrical forces. Atoms are held together via the Coulomb attraction which is generated between the nuclei and the electrons. Said attraction is of immense magnitude reaching values larger than 10 GV/m. For reference, a thunder happens when 10 MV/m happens between the cloud and the ground. Chemistry happens at energy scales thousands times larger than one of the most impressive natural phenomenon human has observed. 
+Chemistry is the world of electrical forces. Atoms are held together via the Coulomb attraction which is generated between the nuclei and the electrons. Said attraction is of immense magnitude reaching values larger than 10 GV/m. For reference, a thunder happens when 10 MV/m field is present between the cloud and the ground. Chemistry happens at energy scales thousands times larger than one of the most impressive natural phenomenon human has observed. 
 
 However, this immense number is its own judgment. Because physics accepts such conditions only inside the atoms, applying a similar field to a macroscopic system is barely impossible. For this reason, chemistry exist. It is the subject that studies how to arrange and use the fields of the nuclei themselves to arrange them in new ways. That's the magic that I have never seen described in chemistry. 
 
