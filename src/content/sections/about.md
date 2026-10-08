@@ -1,5 +1,6 @@
 ---
 title: About
+preview: "A short biography, academic background and ways to get in touch."
 lead: "A personal academic notebook: part portfolio, part digital garden, part place to think in public."
 ---
 

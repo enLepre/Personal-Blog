@@ -16,6 +16,20 @@ Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previ
 
 Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research, Notes and Essays are automatically sorted newest first. Equal dates use the filename as a stable tie-breaker. Dates are metadata and are not displayed, preserving the original design.
 
+Use a `preview` field in the frontmatter to control the short description shown on the homepage and section lists:
+
+```yaml
+---
+title: "Current work"
+date: 2026-10-05
+preview: "Exploring electric fields at material and electrolyte interfaces."
+---
+```
+
+Write the full article below the closing `---`. Lists display only the title, preview and optional note status; clicking the title opens the full Markdown article. Preview text is plain text, not Markdown or HTML. If `preview` is missing or blank, no description is shown; the article body is never used as a fallback. For a longer sentence, YAML's `preview: >-` folded style can span multiple lines.
+
+`src/content/sections/about.md` also supports `preview`: the homepage shows this short description, while `about.html` shows the complete biography and contact text. Section `lead` fields remain the introductory text above the previews.
+
 The existing placeholders all use 2026-10-05, the day they were first committed; they are not new publications. Replace these dates when publishing real content. About uses level-two headings to separate its blocks.
 
 The homepage remains scrollable, with a fixed header and the original active-label crossfade when a section title reaches two-thirds of the viewport. The original `.html` section URLs are also generated. Shared styling lives in `src/styles/global.css`.

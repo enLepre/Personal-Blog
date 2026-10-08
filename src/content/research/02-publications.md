@@ -1,5 +1,6 @@
 ---
 title: "Publications"
+preview: "Selected publications, with context for the research behind them."
 date: 2026-10-05
 ---
 
