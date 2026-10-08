@@ -1,7 +1,8 @@
 ---
 title: "Publications"
-preview: "Selected publications, with context for the research behind them."
+preview: "My publications, updated automatically from ORCID."
+publications: true
 date: 2026-10-05
 ---
 
-A selected publication list can live here, with a little context rather than only citations.
+My published work in chemistry, materials and catalysis.

@@ -1,0 +1,25 @@
+---
+import config from '../data/publication-sync.json';
+import cache from '../data/publications.json';
+if (cache.orcid !== config.orcid) throw new Error('Publication cache does not match the configured ORCID');
+const publications = cache.publications;
+---
+<div class="publications">
+  <p class="publication-source">From my <a href={`https://orcid.org/${config.orcid}`}>ORCID record</a>. Updated automatically each week.</p>
+  {publications.length ? <ol class="publication-list">
+    {publications.map(paper => <li class="item">
+      <h2><a href={paper.url}>{paper.title}</a></h2>
+      {paper.authors && <p class="publication-authors">{paper.authors}</p>}
+      <p>{[paper.journal, paper.year || 'Date not provided'].filter(Boolean).join(' · ')}</p>
+      {paper.doi && <p class="publication-doi"><a href={paper.url}>DOI: {paper.doi}</a></p>}
+    </li>)}
+  </ol> : <p>No public works are currently listed on my ORCID record.</p>}
+</div>
+<style>
+  .publication-source { color: var(--muted); font-size: 16px; line-height: 1.65; margin: 32px 0; }
+  .publication-source a, .publication-doi a { text-decoration: underline; text-underline-offset: 3px; }
+  .publication-list { list-style: none; padding: 0; margin: 0; }
+  .publication-list h2 { font-size: 23px; line-height: 1.4; }
+  .publication-list .publication-authors { margin: 12px 0 6px; }
+  .publication-list .publication-doi { margin-top: 8px; font-size: 15px; overflow-wrap: anywhere; }
+</style>
