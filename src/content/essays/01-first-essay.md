@@ -1,5 +1,6 @@
 ---
 title: "First essay"
+preview: "A place for longer essays as they are published."
 date: 2026-10-05
 ---
 

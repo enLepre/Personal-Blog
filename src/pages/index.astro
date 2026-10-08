@@ -15,7 +15,7 @@ import SectionContent from '../components/SectionContent.astro';
     </section>
     {['research', 'notes', 'essays', 'about'].map(section => <section class="page home-section" id={section} aria-labelledby={`${section}-title`}>
       <h1 class="page-title" id={`${section}-title`}><a href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/${section}.html`}>{section[0].toUpperCase() + section.slice(1)}</a></h1>
-      <div class="page-content"><SectionContent section={section} /></div>
+      <div class="page-content"><SectionContent section={section} previewOnly /></div>
     </section>)}
   </main>
 </Layout>

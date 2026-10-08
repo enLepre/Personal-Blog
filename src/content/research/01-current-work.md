@@ -1,5 +1,6 @@
 ---
 title: "Current work"
+preview: "Exploring how electric fields at material and electrolyte interfaces can drive chemical reactions."
 date: 2026-10-05
 ---
 
