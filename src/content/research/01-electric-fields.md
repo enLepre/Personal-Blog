@@ -1,10 +1,10 @@
 ---
-title: "Current work"
+title: "Electric fields in Chemistry"
 date: 2026-10-05
 preview: "What does it mean to tune reactivity with external stimuli?"
 ---
 
-# Electric fields in Chemistry
+Electric fields in Chemistry
 
 Chemistry is the world of electrical forces. Atoms are held together via the Coulomb attraction which is generated between the nuclei and the electrons. Said attraction is of immense magnitude reaching values larger than 10 GV/m. For reference, a thunder happens when 10 MV/m happens between the cloud and the ground. Chemistry happens at energy scales thousands times larger than one of the most impressive natural phenomenon human has observed. 
 
