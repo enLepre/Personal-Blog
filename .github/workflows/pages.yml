@@ -3,8 +3,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * 1'
 permissions:
-  contents: read
+  contents: write
   actions: read
   pages: write
   id-token: write
@@ -24,8 +26,18 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm sync:publications
       - run: pnpm test
       - run: pnpm run build
+      - name: Save refreshed publications
+        run: |
+          git add src/data/publications.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Refresh publications from ORCID"
+            git push origin HEAD:main
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

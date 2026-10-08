@@ -34,6 +34,16 @@ The existing placeholders all use 2026-10-05, the day they were first committed;
 
 The homepage remains scrollable, with a fixed header and the original active-label crossfade when a section title reaches two-thirds of the viewport. The original `.html` section URLs are also generated. Shared styling lives in `src/styles/global.css`.
 
+## Automatic publications
+
+The Publications article (`research/02-publications.html`) displays all public works from Enrico Lepre's ORCID record, `0000-0003-4252-3056`. Its Markdown frontmatter enables the list with `publications: true`; the homepage retains only its short preview.
+
+`src/data/publication-sync.json` selects the ORCID record. `pnpm sync:publications` fetches the public works and their details, selects ORCID's preferred record in each group, deduplicates DOIs, and saves newest-first titles, authors, journals, years and links to `src/data/publications.json`. Works without DOIs, journal names, authors or dates remain included using the available metadata. Only public ORCID works can be shown; add missing publications to your ORCID record and make them public. This is not a Google Scholar mirror.
+
+The Pages workflow refreshes on every push to `main`, on a manual run, and each Monday at 06:17 UTC. A complete successful refresh replaces the saved list, so edits, removals and visibility changes in ORCID are reflected. Tests and the production build run before the updated cache is committed and published. Workflow-token commits do not trigger another push run. The workflow requires permission to write repository contents.
+
+If ORCID fails or sends incomplete data, the saved list is preserved and the blog can still deploy using that cache. A first sync without any cached works must succeed. Ordinary `pnpm run build` is offline and uses the saved list. Changing the ORCID also requires replacing its cache to avoid showing another person's works.
+
 ## Publish
 
 Every push to `main` runs `.github/workflows/pages.yml`: install from the lockfile, test, build Astro, upload only `dist`, deploy to GitHub Pages. A manual workflow run is also supported. The existing branch-based Pages configuration is supported: the Astro deployment waits for any legacy build of the same commit to finish before publishing, preventing it from overwriting the built site. Switching Pages to **GitHub Actions** removes that redundant legacy build.

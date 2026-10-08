@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "sync:publications": "node scripts/sync-publications.mjs"
   },
   "dependencies": {
     "astro": "^6.0.0"

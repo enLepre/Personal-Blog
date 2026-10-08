@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import Publications from '../../components/Publications.astro';
 export async function getStaticPaths() {
   const sections = ['research', 'notes', 'essays'] as const;
   const routes = await Promise.all(sections.map(async section =>
@@ -20,6 +21,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <article>
       <h1 class="page-title">{entry.data.title}</h1>
       <div class="prose"><Content /></div>
+      {entry.data.publications && <Publications />}
     </article>
   </main>
 </Layout>
