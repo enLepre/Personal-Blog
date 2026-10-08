@@ -1,6 +1,5 @@
 ---
 title: "Current work"
-preview: "Exploring how electric fields at material and electrolyte interfaces can drive chemical reactions."
 date: 2026-10-05
 preview: "What does it mean to tune reactivity with external stimuli?"
 ---
