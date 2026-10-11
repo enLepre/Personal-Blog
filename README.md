@@ -9,10 +9,15 @@ Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previ
 
 ## Edit content
 
+- `src/content/pages/home.md`: home name, image, footer, optional Markdown body, and hierarchy.
 - `src/content/research/*.md`: research entries.
 - `src/content/notes/*.md`: notes, with optional `status`.
 - `src/content/essays/*.md`: essays.
 - `src/content/sections/*.md`: section titles and introductions; `about.md` also contains the biography and contact text.
+
+Every page Markdown file requires a positive integer `level` in its YAML frontmatter. Use `level: 1` for Home, `level: 2` for sections, and `level: 3` for articles. A larger destination level slides upward; a smaller destination level slides downward, even when going directly from an article to Home or using browser history. Equal levels retain the router’s normal direction. Change these numbers to customize hierarchy; URLs do not determine the animation.
+
+Use standard YAML `level: 3` (one colon), not `level:: 3`.
 
 Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research, Notes and Essays are automatically sorted newest first. Equal dates use the filename as a stable tie-breaker. Dates are metadata and are not displayed, preserving the original design.
 
@@ -21,6 +26,7 @@ Use a `preview` field in the frontmatter to control the short description shown 
 ```yaml
 ---
 title: "Current work"
+level: 3
 date: 2026-10-05
 preview: "Exploring electric fields at material and electrolyte interfaces."
 ---
@@ -28,11 +34,11 @@ preview: "Exploring electric fields at material and electrolyte interfaces."
 
 Write the full article below the closing `---`. Lists display only the title, preview and optional note status; clicking the title opens the full Markdown article. Preview text is plain text, not Markdown or HTML. If `preview` is missing or blank, no description is shown; the article body is never used as a fallback. For a longer sentence, YAML's `preview: >-` folded style can span multiple lines.
 
-`src/content/sections/about.md` also supports `preview`: the homepage shows this short description, while `about.html` shows the complete biography and contact text. Section `lead` fields remain the introductory text above the previews.
+Section files supply each section’s title, optional `lead`, and hierarchy. Write Markdown below their frontmatter to add content above the article list; About displays its complete Markdown biography and contact text. Home keeps the name and image by default; its Markdown body is empty and can be filled if you want additional text. Home’s `image` path starts with `/assets/`, and `imageAlt` controls its accessible description.
 
 The existing placeholders all use 2026-10-05, the day they were first committed; they are not new publications. Replace these dates when publishing real content. About uses level-two headings to separate its blocks.
 
-The homepage shows only the name and landscape. A top-left rhombus rotates into a square on hover or focus; clicking or activating it expands the square into the navigation panel. Navigation to a deeper page slides upward; returning to a higher level slides downward (Home → section → article). Same-level navigation follows the router’s normal direction, including browser Back/Forward. The footer stays stationary. Reduced-motion preferences disable the page animation. The original `.html` section and article URLs are preserved. Shared styling lives in `src/styles/global.css`.
+The homepage shows only the name and landscape. A top-left rhombus rotates into a square on hover or focus; clicking or activating it expands the square into the navigation panel. Navigation uses the Markdown `level` values: increasing slides upward, decreasing slides downward (Home → section → article). Same-level navigation follows the router’s normal direction, including browser Back/Forward. The footer stays stationary. Reduced-motion preferences disable the page animation. The original `.html` section and article URLs are preserved. Shared styling lives in `src/styles/global.css`.
 
 ## Automatic publications
 

@@ -39,27 +39,31 @@ test('menu opens only on activation and supports dismissal and client navigation
   assert.equal(nav.inert, false);
 });
 
-test('transition direction follows hierarchy for links and browser history', () => {
+test('transition compares loaded Markdown levels, including direct article-to-home links', async () => {
   const events = {};
-  const document = { querySelector: () => null, addEventListener(name, handler) { events[name] = handler; } };
+  const document = { body: { dataset: {} }, querySelector: () => null, addEventListener(name, handler) { events[name] = handler; } };
   vm.runInNewContext(readFileSync('src/scripts/navigation.js', 'utf8'), { document, AbortController });
-  const direction = (from, to, initial = 'forward') => {
-    const event = { from: new URL(from, 'https://enlepre.github.io'), to: new URL(to, 'https://enlepre.github.io'), direction: initial };
+  const direction = async (current, next, initial = 'forward') => {
+    document.body.dataset.pageLevel = String(current);
+    let loaded = false;
+    const event = { direction: initial, newDocument: document, loader: async () => {
+      loaded = true;
+      event.newDocument = { body: { dataset: { pageLevel: String(next) } } };
+    } };
     events['astro:before-preparation'](event);
+    await event.loader();
+    assert.equal(loaded, true);
     return event.direction;
   };
-  const home = '/Personal-Blog/';
-  const essays = '/Personal-Blog/essays.html';
-  const article = '/Personal-Blog/essays/01-first-essay.html';
-  assert.equal(direction(home, essays), 'forward');
-  assert.equal(direction(essays, article), 'forward');
-  assert.equal(direction(article, essays), 'back');
-  assert.equal(direction(essays, home), 'back');
-  assert.equal(direction(article, home), 'back');
-  assert.equal(direction(article, '/Personal-Blog/index.html'), 'back');
-  assert.equal(direction('/Personal-Blog/index.html', essays), 'forward');
-  assert.equal(direction(essays, article, 'back'), 'forward');
-  assert.equal(direction(essays, '/Personal-Blog/notes.html'), 'forward');
-  assert.equal(direction(essays, '/Personal-Blog/notes.html', 'back'), 'back');
-  assert.equal(direction(essays, essays + '#details', 'back'), 'back');
+  assert.equal(await direction(1, 2), 'forward');
+  assert.equal(await direction(2, 3), 'forward');
+  assert.equal(await direction(3, 2), 'back');
+  assert.equal(await direction(2, 1), 'back');
+  assert.equal(await direction(3, 1), 'back');
+  // Edited levels override route structure and browser-history direction.
+  assert.equal(await direction(5, 1), 'back');
+  assert.equal(await direction(1, 7, 'back'), 'forward');
+  assert.equal(await direction(2, 2), 'forward');
+  assert.equal(await direction(2, 2, 'back'), 'back');
+  assert.equal(await direction(3, undefined, 'back'), 'back');
 });

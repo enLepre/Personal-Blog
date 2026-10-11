@@ -1,4 +1,5 @@
 ---
+level: 3
 title: "Electric fields and Chemical Reactions"
 date: 2026-10-05
 preview: "What does it mean to tune reactivity with external stimuli?"

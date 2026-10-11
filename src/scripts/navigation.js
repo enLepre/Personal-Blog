@@ -35,14 +35,15 @@ document.addEventListener('astro:before-swap', () => {
 document.addEventListener('astro:page-load', initializeMenu);
 initializeMenu();
 
-// Compare hierarchy rather than whether navigation adds a browser history entry.
-// Normalize index.html so both home URLs occupy the same level.
-function pageDepth(url) {
-  return url.pathname.replace(/\/index\.html$/, '/').split('/').filter(Boolean).length;
-}
+// Read the destination's rendered Markdown level after its document is loaded.
 document.addEventListener('astro:before-preparation', (event) => {
-  const difference = pageDepth(event.to) - pageDepth(event.from);
-  if (difference < 0) event.direction = 'back';
-  else if (difference > 0) event.direction = 'forward';
-  // At the same level, retain the router's direction (including Back/Forward).
+  const load = event.loader;
+  event.loader = async () => {
+    await load();
+    const current = Number(document.body.dataset.pageLevel);
+    const next = Number(event.newDocument?.body.dataset.pageLevel);
+    if (!Number.isFinite(current) || !Number.isFinite(next)) return;
+    if (next < current) event.direction = 'back';
+    else if (next > current) event.direction = 'forward';
+  };
 });

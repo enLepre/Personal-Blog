@@ -199,3 +199,12 @@ html { scroll-behavior: auto; }
   ::view-transition-old(page-content), ::view-transition-new(page-content) { animation: none !important; }
   .menu::before, .menu nav, .menu-toggle span { transition: none; }
 }
+
+/* Explicit direction also governs the native transition snapshots. */
+[data-astro-transition="back"]::view-transition-old(page-content) { animation-name: page-down-out !important; }
+[data-astro-transition="back"]::view-transition-new(page-content) { animation-name: page-down-in !important; }
+.section-intro { margin-bottom: 36px; }
+@media (prefers-reduced-motion: reduce) {
+  [data-astro-transition="back"]::view-transition-old(page-content),
+  [data-astro-transition="back"]::view-transition-new(page-content) { animation: none !important; }
+}
