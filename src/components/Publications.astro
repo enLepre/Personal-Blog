@@ -35,7 +35,10 @@ const years = [...new Set(publications.map(paper => paper.year).filter(Boolean))
 </div>
 <script>
   const normalize = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  function initializePublications() {
   for (const root of document.querySelectorAll<HTMLElement>('.publications')) {
+    if (root.dataset.ready) continue;
+    root.dataset.ready = 'true';
     const form = root.querySelector<HTMLFormElement>('.publication-filters');
     const query = root.querySelector<HTMLInputElement>('input[type="search"]');
     const year = root.querySelector<HTMLSelectElement>('select');
@@ -68,6 +71,9 @@ const years = [...new Set(publications.map(paper => paper.year).filter(Boolean))
     form.hidden = false;
     update();
   }
+  }
+  document.addEventListener('astro:page-load', initializePublications);
+  initializePublications();
 </script>
 <style>
   .publication-filters { display: grid; grid-template-columns: minmax(0, 1fr) 130px auto; gap: 12px 16px; align-items: end; margin: 0 0 12px; }

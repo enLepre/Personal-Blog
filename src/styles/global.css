@@ -138,181 +138,6 @@ nav a{display:block}
 
 
 
-/*
-  Title journey adapted from the News title zoom used in WebsiteTest.
-  The moving word is typeset at every frame (font-size/line-height/width),
-  rather than being geometrically scaled, so it lands exactly on the menu text.
-*/
-.title-journey-overlay{
-  position:fixed;
-  left:0;
-  right:0;
-  z-index:300;
-  overflow:hidden;
-  background:#fff;
-  opacity:1;
-  pointer-events:none;
-  will-change:opacity;
-}
-.title-journey-word{
-  position:fixed;
-  z-index:700;
-  margin:0;
-  padding:0;
-  overflow-wrap:anywhere;
-  white-space:nowrap;
-  pointer-events:none;
-  transform-origin:top left;
-  background:transparent;
-  text-shadow:none;
-  filter:none;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-  will-change:left,top,width,font-size,line-height,color;
-}
-.title-journey-hidden{
-  visibility:hidden !important;
-}
-body.is-page-transitioning{
-  overflow:hidden;
-}
-
-@media(prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-}
-
-@media(max-width:700px){
-  body{padding-bottom:54px}
-  .site-header{align-items:flex-start;gap:18px}
-  .brand{font-size:20px}
-  nav{gap:12px;flex-wrap:wrap;justify-content:flex-end;font-size:14px}
-  .hero{padding-top:20px}
-  .landscape{margin-top:50px}
-  .page{margin-top:18px}
-  .site-footer{padding:11px 0 13px;font-size:13px}
-}
-
-
-/* One-page homepage: reuse the existing page aesthetic without restyling it. */
-.home-section{
-  min-height:calc(100svh - 86px);
-  padding-top:28px;
-  padding-bottom:96px;
-  scroll-margin-top:18px;
-}
-.home-section .page-title{
-  margin:0 0 36px;
-  font-size:clamp(50px,7vw,78px);
-  line-height:1;
-  letter-spacing:-.04em;
-  font-weight:400;
-}
-#top{scroll-margin-top:0}
-
-@media(max-width:700px){
-  .home-section{
-    min-height:auto;
-    padding-top:18px;
-    padding-bottom:82px;
-    scroll-margin-top:10px;
-  }
-}
-
-
-/* Persistent top navigation and smooth active-section emphasis. */
-:root{
-  --site-header-height:74px;
-}
-
-body{
-  padding-top:var(--site-header-height);
-}
-
-.site-header{
-  position:fixed;
-  top:0;
-  left:50%;
-  z-index:500;
-  width:min(calc(100% - 48px),var(--max));
-  transform:translateX(-50%);
-  background:rgba(255,255,255,.96);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-}
-
-.site-header nav a{
-  position:relative;
-  color:var(--ink);
-  font-weight:400;
-  transition:color .32s ease;
-}
-
-/* A bold copy is faded in above the regular label, avoiding layout shift
-   and making the change of section feel continuous rather than abrupt. */
-.site-header nav a::after{
-  content:attr(data-label);
-  position:absolute;
-  inset:0;
-  font-weight:700;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .34s cubic-bezier(.22,.61,.36,1);
-}
-
-.site-header nav a.is-active::after{
-  opacity:1;
-}
-
-.site-header nav a.is-active{
-  text-decoration:none;
-}
-
-.site-header .brand{
-  transition:font-weight .28s ease, opacity .28s ease;
-}
-
-.site-header .brand.is-active{
-  font-weight:700;
-}
-
-.hero,
-.home-section{
-  scroll-margin-top:calc(var(--site-header-height) + 18px);
-}
-
-@media(max-width:700px){
-  :root{--site-header-height:68px}
-  body{padding-top:var(--site-header-height)}
-  .site-header{
-    width:min(calc(100% - 32px),var(--max));
-    padding-top:18px;
-    padding-bottom:14px;
-  }
-  .hero,
-  .home-section{
-    scroll-margin-top:calc(var(--site-header-height) + 12px);
-  }
-}
-
-
-/* Stronger, unmistakable active-section crossfade. */
-.site-header nav a{
-  transition:color .38s ease;
-}
-.site-header nav a::after{
-  color:var(--ink);
-  transition:opacity .38s cubic-bezier(.22,.61,.36,1);
-}
-.site-header nav a.is-active{
-  color:transparent;
-}
-.site-header nav a:not(.is-active)::after{
-  opacity:0;
-}
-.site-header nav a.is-active::after{
-  opacity:1;
-}
-
 /* Shared Markdown typography on the homepage and individual pages. */
 .prose p {
   margin: 0 0 1.25em;
@@ -333,3 +158,40 @@ body{
   font-size: 16px;
 }
 .article-page { padding-top: 28px; }
+
+/* The page moves independently of the persistent menu and footer. */
+:root { --site-header-height: 84px; }
+body { padding-top: var(--site-header-height); }
+html { scroll-behavior: auto; }
+.site-header { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 500; padding: 24px 0; pointer-events: none; }
+.menu { position: relative; pointer-events: auto; }
+.menu-toggle { display: flex; align-items: center; gap: 24px; border: 0; padding: 8px 0; background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; cursor: pointer; }
+.menu-toggle span { font-size: 21px; transition: transform .2s ease; }
+.menu.is-open .menu-toggle span { transform: rotate(45deg); }
+.menu nav { position: absolute; top: 100%; left: -20px; display: flex; flex-direction: column; gap: 0; min-width: 238px; padding: 20px; background: var(--paper); border: 1px solid var(--hairline); box-shadow: 0 14px 40px #1111110a; visibility: hidden; opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s, visibility .2s; }
+.menu.is-open nav { visibility: visible; opacity: 1; transform: translateY(0); }
+.menu nav a { padding: 10px 0; font-size: 17px; }
+.menu nav .brand { font-size: 23px; padding-bottom: 20px; margin-bottom: 8px; border-bottom: 1px solid var(--hairline); }
+.menu nav a.is-active { font-style: italic; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
+.hero { min-height: calc(100svh - var(--site-header-height) - 58px); padding: 32px 0 48px; }
+.hero .landscape { width: min(560px, 100%); max-height: 48svh; object-fit: contain; margin-top: 44px; }
+.page-stage { display: flow-root; min-height: calc(100svh - var(--site-header-height) - 58px); background: var(--paper); }
+.site-footer { z-index: 600; background: var(--paper); }
+@keyframes page-up-out { from { transform: translateY(0); } to { transform: translateY(-100vh); } }
+@keyframes page-up-in { from { transform: translateY(100vh); } to { transform: translateY(0); } }
+::view-transition-group(site-footer), ::view-transition-group(site-menu) { z-index: 10; }
+::view-transition-old(site-footer), ::view-transition-old(site-menu) { display: none; }
+::view-transition-new(site-footer), ::view-transition-new(site-menu) { animation: none; }
+@media (max-width: 700px) {
+  :root { --site-header-height: 72px; }
+  .site-header { width: calc(100% - 32px); padding: 16px 0; }
+  .menu nav { left: 0; }
+  .hero { min-height: calc(100svh - var(--site-header-height) - 54px); }
+  .hero .page-title { font-size: clamp(48px, 12vw, 84px); }
+  .hero .landscape { margin-top: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-content), ::view-transition-new(page-content) { animation: none !important; }
+  .menu nav, .menu-toggle span { transition: none; }
+}

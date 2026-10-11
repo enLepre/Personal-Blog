@@ -32,7 +32,7 @@ Write the full article below the closing `---`. Lists display only the title, pr
 
 The existing placeholders all use 2026-10-05, the day they were first committed; they are not new publications. Replace these dates when publishing real content. About uses level-two headings to separate its blocks.
 
-The homepage remains scrollable, with a fixed header and the original active-label crossfade when a section title reaches two-thirds of the viewport. The original `.html` section URLs are also generated. Shared styling lives in `src/styles/global.css`.
+The homepage shows only the name and landscape. The top-left Menu reveals a vertical navigation list on hover, keyboard focus, or tap. Navigation slides the current page upward and the next page in from below, with a stationary footer. Reduced-motion preferences disable the page animation. The original `.html` section and article URLs are preserved. Shared styling lives in `src/styles/global.css`.
 
 ## Automatic publications
 
