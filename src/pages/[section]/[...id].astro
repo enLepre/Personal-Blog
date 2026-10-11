@@ -23,7 +23,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <Layout section={section} title={entry.data.title} level={entry.data.level} reading={entry.data.reading}>
   <main class="page article-page">
-    <a class="back-link" href={`${base}/${section}.html`}>← {parent?.data.title || section}</a>
+    <a class="back-link" href={`${base}/${section}.html`}>↑ {parent?.data.title || section}</a>
     <article>
       <h1 class="page-title">{entry.data.title}</h1>
       <div class="prose"><Content /></div>
