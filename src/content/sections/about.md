@@ -8,9 +8,12 @@ lead: "Chemistry to solve problems"
 
 ## Biography
 
-Born in Italy in 1995, moved to Germany in 2019 and to Switzerland in 2024. I am interested in chemistry, its role in our society and how to use it to solve problems.
+Born in Italy in 1995, moved to Germany in 2019 and to Switzerland in 2024. 
+
+I am interested in chemistry, its role in our society and how to use it to solve problems.
 
 ## CV & contact
+
 
 enrico.lepre@chem.uzh.ch
 
