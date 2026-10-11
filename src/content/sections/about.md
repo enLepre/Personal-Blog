@@ -3,7 +3,7 @@ level: 2
 reading: false
 title: About
 preview: "A short biography, academic background and ways to get in touch."
-lead: "Chemistry to solve problems"
+lead: ""
 ---
 
 ## Biography
