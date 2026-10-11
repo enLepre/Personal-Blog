@@ -4,7 +4,7 @@ legacySlug: 01-electric-fields
 level: 3
 reading: true
 title: "Electric fields and Chemical Reactions"
-date: 2026-10-05
+date: 
 preview: "What does it mean to tune reactivity with external stimuli?"
 ---
 
