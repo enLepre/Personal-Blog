@@ -18,6 +18,13 @@ const sections = await getCollection('sections');
 const sectionTitle = (id: string) => sections.find(entry => entry.id === id)?.data.title || id;
 const home = section === 'home';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const publicationEntry = await getEntry('research', 'publications');
+const menuItems = ['research', 'publications', 'essays', 'notes', 'about'].map(id => ({
+  id,
+  label: id === 'publications' ? publicationEntry?.data.title || 'Publications' : sectionTitle(id),
+  href: `${base}/${id === 'publications' ? 'research/publications' : id}.html`,
+}));
+const publicationPage = Astro.url.pathname === `${base}/research/publications.html`;
 ---
 <!doctype html>
 <html lang="en">
@@ -36,7 +43,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <button class="menu-toggle" aria-expanded="false" aria-controls="main-menu" aria-label="Open navigation"><span aria-hidden="true"></span></button>
       <nav id="main-menu" aria-label="Main navigation" inert>
         <a class="brand" href={`${base}/`} data-nav="home">{homeEntry.data.menuTitle}</a>
-        {['research', 'notes', 'essays', 'about'].map(id => <a href={`${base}/${id}.html`} data-nav={id} class:list={{ 'is-active': !home && id === section }} aria-current={!home && id === section ? 'page' : undefined}>{sectionTitle(id)}</a>)}
+        {menuItems.map(({ id, label, href }) => {
+          const active = id === 'publications' ? publicationPage : !home && !publicationPage && id === section;
+          return <a href={href} data-nav={id} class:list={{ 'is-active': active }} aria-current={active ? 'page' : undefined}>{label}</a>;
+        })}
       </nav>
     </div>
   </header>
