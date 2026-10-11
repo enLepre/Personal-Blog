@@ -5,7 +5,7 @@ reading: true
 order: 2
 date: 2026-10-11
 preview: "Not only graphite or diamond, but a long list of underdogs heroes"
-publications: true
+publications: false
 ---
 
 Carbon materials are ubiquitous playing a role in everyday tasks such as writing with graphite or special moments such as a marriage proposal with a diamond. Carbons are central not only for daily life experience, but they find application in modern day engineering, giving options to clean water from pollutants, transform raw chemical materials in more valuable ones, or store charges in batteries or capacitors. 
