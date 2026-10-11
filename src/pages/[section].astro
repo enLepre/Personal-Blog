@@ -8,10 +8,17 @@ export function getStaticPaths() {
 const { section } = Astro.params;
 const entry = await getEntry('sections', section!);
 if (!entry) throw new Error(`Missing section Markdown: ${section}`);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <Layout section={section} title={entry.data.title} level={entry.data.level} reading={entry.data.reading}>
   <main class="page">
-    <h1 class="page-title">{entry.data.title}</h1>
-    <div class="page-content"><SectionContent section={section} /></div>
+    <div class:list={{ 'section-heading': true, 'has-portrait': Boolean(entry.data.portrait) }}>
+      <div>
+        <h1 class="page-title">{entry.data.title}</h1>
+        {entry.data.portrait && entry.data.lead && <p class="lead">{entry.data.lead}</p>}
+      </div>
+      {entry.data.portrait && <img class="section-portrait" src={`${base}${entry.data.portrait}`} alt={entry.data.portraitAlt} width="1200" height="1013" />}
+    </div>
+    <div class="page-content"><SectionContent section={section} hideLead={Boolean(entry.data.portrait)} /></div>
   </main>
 </Layout>

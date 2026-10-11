@@ -2,13 +2,13 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import { articleHref } from '../lib/urls.mjs';
 import { newestFirst } from '../lib/sort.mjs';
-const { section, previewOnly = false } = Astro.props;
+const { section, previewOnly = false, hideLead = false } = Astro.props;
 const intro = await getEntry('sections', section);
 if (!intro) throw new Error(`Missing section: ${section}`);
 const entries = section === 'about' ? [] : newestFirst(await getCollection(section));
 const Intro = !previewOnly ? (await render(intro)).Content : null;
 ---
-{intro.data.lead && <p class="lead">{intro.data.lead}</p>}
+{!hideLead && intro.data.lead && <p class="lead">{intro.data.lead}</p>}
 {section !== 'about' && !previewOnly && intro.body?.trim() && <div class="prose section-intro">{Intro && <Intro />}</div>}
 {section === 'about' ? <div class="about-content prose">{Intro ? <Intro /> : intro.data.preview && <p>{intro.data.preview}</p>}</div> : section === 'notes' ? (
   <ul class="note-list">

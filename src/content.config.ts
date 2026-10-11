@@ -12,6 +12,6 @@ export const collections = {
   research: dated('research'), notes: dated('notes'), essays: dated('essays'),
   sections: defineCollection({
     loader: glob({ pattern: ['*.md', '!template.md'], base: './src/content/sections' }),
-    schema: z.object({ title: z.string(), level: z.number().int().positive(), reading: z.boolean().default(false), lead: z.string().default(''), preview: z.string().trim().default('') })
+    schema: z.object({ title: z.string(), level: z.number().int().positive(), reading: z.boolean().default(false), portrait: z.string().optional(), portraitAlt: z.string().default('Portrait'), lead: z.string().default(''), preview: z.string().trim().default('') })
   })
 };

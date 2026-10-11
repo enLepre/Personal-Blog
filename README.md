@@ -73,3 +73,5 @@ Each content folder (`pages`, `sections`, `research`, `notes`, `essays`) contain
 Numeric filename prefixes have been removed. Their tie-breaking order is stored in each article’s `order` field. The optional `legacySlug` field preserves a previous URL through a redirect (for example `01-first-essay` redirects to `first-essay.html`); keep it on the renamed article and omit it on new articles. Current site links use the clean filenames.
 
 External web links in Markdown (including HTML links) and the publication list open in a new browser tab or window. Internal links retain normal page navigation. No extra Markdown properties are required for this behavior.
+
+The About page uses `portrait` and `portraitAlt` in `src/content/sections/about.md` to display a photograph beside the title at the top-right. Its local image was copied from `WebsiteTest/website/public/people/enrico-lepre-profile.webp`; removing `portrait` restores the text-only heading.
