@@ -2,7 +2,7 @@
 title: "Carbonaceous materials"
 level: 3
 reading: true
-order: 1
+order: 2
 date: 2026-10-11
 preview: "Not only graphite or diamond, but a long list of underdogs heroes"
 publications: true
