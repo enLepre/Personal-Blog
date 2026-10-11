@@ -12,6 +12,8 @@ Born in Italy in 1995, moved to Germany in 2019 and to Switzerland in 2024. I am
 
 ## CV & contact
 
+enrico.lepre@chem.uzh.ch
+
 2024 - University of Zurich (Postdoc, Physical Chemistry)
 
 2023 - Hte gmbh (Postdoc, Process Chemistry)
