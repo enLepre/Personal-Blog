@@ -1,5 +1,5 @@
 ---
-title: "What Is a Good Song?"
+title: "What makes a good song Good?"
 level: 3
 reading: true
 order: 1
