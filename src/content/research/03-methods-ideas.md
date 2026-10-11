@@ -1,5 +1,6 @@
 ---
 level: 3
+reading: true
 title: "Methods & ideas"
 preview: "Concepts and experimental approaches that connect my research projects."
 date: 2026-10-05

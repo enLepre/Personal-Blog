@@ -32,8 +32,12 @@ document.addEventListener('astro:before-swap', () => {
   controller.abort();
   controller = new AbortController();
 });
-document.addEventListener('astro:page-load', initializeMenu);
+document.addEventListener('astro:page-load', () => {
+  initializeMenu();
+  initializeReadingPage();
+});
 initializeMenu();
+initializeReadingPage();
 
 // Read the destination's rendered Markdown level after its document is loaded.
 document.addEventListener('astro:before-preparation', (event) => {
@@ -47,3 +51,31 @@ document.addEventListener('astro:before-preparation', (event) => {
     else if (next > current) event.direction = 'forward';
   };
 });
+
+function initializeReadingPage() {
+  const body = document.body;
+  if (body?.dataset.reading !== 'true' || body.dataset.readingReady) return;
+  const header = document.querySelector('.site-header');
+  const footer = document.querySelector('.site-footer');
+  if (!header || !footer) return;
+  body.dataset.readingReady = 'true';
+  const update = () => {
+    if (document.body !== body) return;
+    const hidden = window.scrollY > 48;
+    body.classList.toggle('is-reading-scrolled', hidden);
+    header.inert = hidden;
+    footer.inert = hidden;
+    if (hidden) {
+      const menu = header.querySelector('.menu');
+      menu?.classList.remove('is-open');
+      const toggle = header.querySelector('.menu-toggle');
+      toggle?.setAttribute('aria-expanded', 'false');
+      toggle?.setAttribute('aria-label', 'Open navigation');
+      const nav = header.querySelector('nav');
+      if (nav) nav.inert = true;
+    }
+  };
+  window.addEventListener('scroll', update, { passive: true, signal: controller.signal });
+  // Also handles restored scroll positions after browser Back/Forward.
+  update();
+}

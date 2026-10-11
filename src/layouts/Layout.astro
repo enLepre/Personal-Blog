@@ -11,7 +11,7 @@ const reverseMovement = {
   new: { ...movement.new, name: 'page-down-in' }
 };
 const pageTransition = { forwards: movement, backwards: reverseMovement };
-const { section = 'home', title, level } = Astro.props;
+const { section = 'home', title, level, reading = false } = Astro.props;
 const homeEntry = await getEntry('pages', 'home');
 if (!homeEntry) throw new Error('Missing pages/home.md');
 const sections = await getCollection('sections');
@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   <title>{home ? homeEntry.data.title : `${title || sectionTitle(section)} — ${homeEntry.data.title}`}</title>
   <meta name="description" content="Research, notes and essays by Enrico Lepre." />
 </head>
-<body id="top" data-page={section} data-page-level={level}>
+<body id="top" data-page={section} data-page-level={level} data-reading={String(reading)}>
   <header class="site-header shell" transition:name="site-menu" transition:animate="none">
     <div class="menu">
       <button class="menu-toggle" aria-expanded="false" aria-controls="main-menu" aria-label="Open navigation"><span aria-hidden="true"></span></button>

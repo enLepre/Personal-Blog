@@ -208,3 +208,25 @@ html { scroll-behavior: auto; }
   [data-astro-transition="back"]::view-transition-old(page-content),
   [data-astro-transition="back"]::view-transition-new(page-content) { animation: none !important; }
 }
+
+/* Reading pages clear the viewport once the reader leaves the top. */
+body[data-reading="true"] .site-header,
+body[data-reading="true"] .site-footer {
+  transition: opacity .22s ease, transform .22s ease, visibility .22s;
+}
+body[data-reading="true"].is-reading-scrolled .site-header {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-12px);
+}
+body[data-reading="true"].is-reading-scrolled .site-footer {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(12px);
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-reading="true"] .site-header,
+  body[data-reading="true"] .site-footer { transition: none; }
+}

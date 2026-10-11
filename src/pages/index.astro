@@ -6,7 +6,7 @@ if (!home) throw new Error('Missing pages/home.md');
 const { Content } = await render(home);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
-<Layout level={home.data.level}>
+<Layout level={home.data.level} reading={home.data.reading}>
   <main>
     <section class="hero shell" aria-labelledby="home-title">
       <div class="hero-inner">

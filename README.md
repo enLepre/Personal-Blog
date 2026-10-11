@@ -17,6 +17,8 @@ Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previ
 
 Every page Markdown file requires a positive integer `level` in its YAML frontmatter. Use `level: 1` for Home, `level: 2` for sections, and `level: 3` for articles. A larger destination level slides upward; a smaller destination level slides downward, even when going directly from an article to Home or using browser history. Equal levels retain the router’s normal direction. Change these numbers to customize hierarchy; URLs do not determine the animation.
 
+Each page also supports `reading: true` or `reading: false`. All current level 3 articles use `reading: true`; Home and sections use `false`. This setting is independent of `level`, so you can change either later. On reading pages, the rhombus and footer appear at the top, fade away after scrolling more than 48 pixels, and reappear when you return to the top area. Hidden controls cannot receive clicks or keyboard focus. On other pages they stay visible. A page opened or restored partway down starts with the controls hidden.
+
 Use standard YAML `level: 3` (one colon), not `level:: 3`.
 
 Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research, Notes and Essays are automatically sorted newest first. Equal dates use the filename as a stable tie-breaker. Dates are metadata and are not displayed, preserving the original design.
@@ -27,6 +29,7 @@ Use a `preview` field in the frontmatter to control the short description shown 
 ---
 title: "Current work"
 level: 3
+reading: true
 date: 2026-10-05
 preview: "Exploring electric fields at material and electrolyte interfaces."
 ---

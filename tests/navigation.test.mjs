@@ -67,3 +67,49 @@ test('transition compares loaded Markdown levels, including direct article-to-ho
   assert.equal(await direction(2, 2, 'back'), 'back');
   assert.equal(await direction(3, undefined, 'back'), 'back');
 });
+
+test('reading controls hide on scroll, return at the top, and reset after navigation', () => {
+  const events = {}, scrollListeners = [];
+  const makeBody = reading => {
+    const classes = new Set();
+    return { dataset: { reading: String(reading) }, classes, classList: { toggle(name, active) { active ? classes.add(name) : classes.delete(name); } } };
+  };
+  const menuClasses = new Set(['is-open']);
+  const toggle = { attrs: {}, setAttribute(name, value) { this.attrs[name] = value; } };
+  const nav = { inert: false };
+  const header = { inert: false, querySelector(selector) {
+    if (selector === '.menu') return { classList: { remove(name) { menuClasses.delete(name); } } };
+    return selector === 'nav' ? nav : toggle;
+  } };
+  const footer = { inert: false };
+  const document = { body: makeBody(true), querySelector(selector) { return selector === '.site-header' ? header : selector === '.site-footer' ? footer : null; }, addEventListener(name, handler) { events[name] = handler; } };
+  const window = { scrollY: 0, addEventListener(name, handler, options) { scrollListeners.push({ handler, signal: options.signal }); } };
+  vm.runInNewContext(readFileSync('src/scripts/navigation.js', 'utf8'), { document, window, AbortController });
+  assert.equal(header.inert, false);
+  window.scrollY = 180; scrollListeners[0].handler();
+  assert.equal(document.body.classes.has('is-reading-scrolled'), true);
+  assert.equal(header.inert, true);
+  assert.equal(footer.inert, true);
+  assert.equal(nav.inert, true);
+  assert.equal(menuClasses.has('is-open'), false);
+  assert.equal(toggle.attrs['aria-expanded'], 'false');
+  window.scrollY = 0; scrollListeners[0].handler();
+  assert.equal(document.body.classes.has('is-reading-scrolled'), false);
+  assert.equal(header.inert, false);
+  assert.equal(footer.inert, false);
+  events['astro:before-swap']();
+  assert.equal(scrollListeners[0].signal.aborted, true);
+  document.body = makeBody(false);
+  events['astro:page-load']();
+  assert.equal(scrollListeners.length, 1);
+  assert.equal(document.body.classes.has('is-reading-scrolled'), false);
+  // Restoring a reading page halfway down immediately hides the controls.
+  document.body = makeBody(true); window.scrollY = 400;
+  events['astro:page-load']();
+  assert.equal(scrollListeners.length, 2);
+  assert.equal(header.inert, true);
+  assert.equal(footer.inert, true);
+  assert.equal(document.body.classes.has('is-reading-scrolled'), true);
+  events['astro:page-load']();
+  assert.equal(scrollListeners.length, 2);
+});

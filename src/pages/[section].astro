@@ -9,7 +9,7 @@ const { section } = Astro.params;
 const entry = await getEntry('sections', section!);
 if (!entry) throw new Error(`Missing section Markdown: ${section}`);
 ---
-<Layout section={section} title={entry.data.title} level={entry.data.level}>
+<Layout section={section} title={entry.data.title} level={entry.data.level} reading={entry.data.reading}>
   <main class="page">
     <h1 class="page-title">{entry.data.title}</h1>
     <div class="page-content"><SectionContent section={section} /></div>
