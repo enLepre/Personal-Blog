@@ -1,5 +1,5 @@
 ---
-portrait: /assets/enrico-lepre.webp
+portrait: /assets/enrico-lepre.jpg
 portraitAlt: Portrait of Enrico Lepre
 level: 2
 reading: false

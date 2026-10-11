@@ -74,4 +74,4 @@ Numeric filename prefixes have been removed. Their tie-breaking order is stored 
 
 External web links in Markdown (including HTML links) and the publication list open in a new browser tab or window. Internal links retain normal page navigation. No extra Markdown properties are required for this behavior.
 
-The About page uses `portrait` and `portraitAlt` in `src/content/sections/about.md` to display a photograph beside the title at the top-right. Its local image was copied from `WebsiteTest/website/public/people/enrico-lepre-profile.webp`; removing `portrait` restores the text-only heading.
+The About page uses `portrait` and `portraitAlt` in `src/content/sections/about.md` to display a photograph beside the title at the top-right. Its current local image (`public/assets/enrico-lepre.jpg`) is the supplied `IMG_1544.JPG`; removing `portrait` restores the text-only heading.

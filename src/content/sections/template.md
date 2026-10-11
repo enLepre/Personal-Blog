@@ -4,7 +4,7 @@ level: 2
 reading: false
 lead: "The introduction displayed above this section's content."
 # Optional portrait displayed at the top-right:
-# portrait: /assets/enrico-lepre.webp
+# portrait: /assets/enrico-lepre.jpg
 # portraitAlt: "Portrait of Enrico Lepre"
 preview: "An optional short plain-text description."
 ---
