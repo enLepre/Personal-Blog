@@ -68,7 +68,7 @@ test('transition compares loaded Markdown levels, including direct article-to-ho
   assert.equal(await direction(3, undefined, 'back'), 'back');
 });
 
-test('reading controls hide on scroll, return at the top, and reset after navigation', () => {
+test('all page controls hide on scroll, return at the top, and reset after navigation', () => {
   const events = {}, scrollListeners = [];
   const makeBody = reading => {
     const classes = new Set();
@@ -87,29 +87,35 @@ test('reading controls hide on scroll, return at the top, and reset after naviga
   vm.runInNewContext(readFileSync('src/scripts/navigation.js', 'utf8'), { document, window, AbortController });
   assert.equal(header.inert, false);
   window.scrollY = 180; scrollListeners[0].handler();
-  assert.equal(document.body.classes.has('is-reading-scrolled'), true);
+  assert.equal(document.body.classes.has('is-page-scrolled'), true);
   assert.equal(header.inert, true);
   assert.equal(footer.inert, true);
   assert.equal(nav.inert, true);
   assert.equal(menuClasses.has('is-open'), false);
   assert.equal(toggle.attrs['aria-expanded'], 'false');
   window.scrollY = 0; scrollListeners[0].handler();
-  assert.equal(document.body.classes.has('is-reading-scrolled'), false);
+  assert.equal(document.body.classes.has('is-page-scrolled'), false);
   assert.equal(header.inert, false);
   assert.equal(footer.inert, false);
   events['astro:before-swap']();
   assert.equal(scrollListeners[0].signal.aborted, true);
   document.body = makeBody(false);
   events['astro:page-load']();
-  assert.equal(scrollListeners.length, 1);
-  assert.equal(document.body.classes.has('is-reading-scrolled'), false);
-  // Restoring a reading page halfway down immediately hides the controls.
-  document.body = makeBody(true); window.scrollY = 400;
-  events['astro:page-load']();
   assert.equal(scrollListeners.length, 2);
+  assert.equal(document.body.classes.has('is-page-scrolled'), false);
+  // Non-reading pages also hide controls while scrolling.
+  window.scrollY = 180; scrollListeners[1].handler();
   assert.equal(header.inert, true);
   assert.equal(footer.inert, true);
-  assert.equal(document.body.classes.has('is-reading-scrolled'), true);
+  events['astro:before-swap']();
+  assert.equal(scrollListeners[1].signal.aborted, true);
+  // Restoring a page halfway down immediately hides the controls.
+  document.body = makeBody(true); window.scrollY = 400;
   events['astro:page-load']();
-  assert.equal(scrollListeners.length, 2);
+  assert.equal(scrollListeners.length, 3);
+  assert.equal(header.inert, true);
+  assert.equal(footer.inert, true);
+  assert.equal(document.body.classes.has('is-page-scrolled'), true);
+  events['astro:page-load']();
+  assert.equal(scrollListeners.length, 3);
 });

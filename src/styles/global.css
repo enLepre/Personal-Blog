@@ -212,25 +212,25 @@ html { scroll-behavior: auto; }
 }
 
 /* Reading pages clear the viewport once the reader leaves the top. */
-body[data-reading="true"] .site-header,
-body[data-reading="true"] .site-footer {
+body .site-header,
+body .site-footer {
   transition: opacity .22s ease, transform .22s ease, visibility .22s;
 }
-body[data-reading="true"].is-reading-scrolled .site-header {
+body.is-page-scrolled .site-header {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateX(-50%) translateY(-12px);
 }
-body[data-reading="true"].is-reading-scrolled .site-footer {
+body.is-page-scrolled .site-footer {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateX(-50%) translateY(12px);
 }
 @media (prefers-reduced-motion: reduce) {
-  body[data-reading="true"] .site-header,
-  body[data-reading="true"] .site-footer { transition: none; }
+  body .site-header,
+  body .site-footer { transition: none; }
 }
 
 /* Match the blank-line spacing between the About page paragraphs. */

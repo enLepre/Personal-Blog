@@ -17,7 +17,7 @@ Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previ
 
 Every page Markdown file requires a positive integer `level` in its YAML frontmatter. Use `level: 1` for Home, `level: 2` for sections, and `level: 3` for articles. A larger destination level slides upward; a smaller destination level slides downward, even when going directly from an article to Home or using browser history. Equal levels retain the router’s normal direction. Change these numbers to customize hierarchy; URLs do not determine the animation.
 
-Each page also supports `reading: true` or `reading: false`. All current level 3 articles use `reading: true`; Home and sections use `false`. This setting is independent of `level`, so you can change either later. On reading pages, the rhombus and footer appear at the top, fade away after scrolling more than 48 pixels, and reappear when you return to the top area. Hidden controls cannot receive clicks or keyboard focus. On other pages they stay visible. A page opened or restored partway down starts with the controls hidden.
+Each page also supports `reading: true` or `reading: false`. All current level 3 articles use `reading: true`; Home and sections use `false`. This setting is independent of `level`, so you can change either later. On all pages, the rhombus and footer appear at the top, fade away after scrolling more than 48 pixels, and reappear when you return to the top area. Hidden controls cannot receive clicks or keyboard focus. A page opened or restored partway down starts with the controls hidden.
 
 Use standard YAML `level: 3` (one colon), not `level:: 3`.
 
@@ -75,3 +75,5 @@ Numeric filename prefixes have been removed. Their tie-breaking order is stored 
 External web links in Markdown (including HTML links) and the publication list open in a new browser tab or window. Internal links retain normal page navigation. No extra Markdown properties are required for this behavior.
 
 The About page uses `portrait` and `portraitAlt` in `src/content/sections/about.md` to display a photograph beside the title at the top-right. Its current local image (`public/assets/enrico-lepre.jpg`) is the supplied `IMG_1544.JPG`; removing `portrait` restores the text-only heading.
+
+The home image uses `public/assets/landscape-highres.png` (1575 × 999), enhanced with the built-in image tool from the original 560 × 355 drawing. Prompt: improve resolution and clarity while preserving the mountain silhouettes, river, sparse pen strokes, white background, composition, and handwritten “Same questions, a wider landscape.” note.

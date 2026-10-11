@@ -34,10 +34,10 @@ document.addEventListener('astro:before-swap', () => {
 });
 document.addEventListener('astro:page-load', () => {
   initializeMenu();
-  initializeReadingPage();
+  initializeScrollControls();
 });
 initializeMenu();
-initializeReadingPage();
+initializeScrollControls();
 
 // Read the destination's rendered Markdown level after its document is loaded.
 document.addEventListener('astro:before-preparation', (event) => {
@@ -52,17 +52,17 @@ document.addEventListener('astro:before-preparation', (event) => {
   };
 });
 
-function initializeReadingPage() {
+function initializeScrollControls() {
   const body = document.body;
-  if (body?.dataset.reading !== 'true' || body.dataset.readingReady) return;
+  if (!body || body.dataset.scrollControlsReady) return;
   const header = document.querySelector('.site-header');
   const footer = document.querySelector('.site-footer');
   if (!header || !footer) return;
-  body.dataset.readingReady = 'true';
+  body.dataset.scrollControlsReady = 'true';
   const update = () => {
     if (document.body !== body) return;
     const hidden = window.scrollY > 48;
-    body.classList.toggle('is-reading-scrolled', hidden);
+    body.classList.toggle('is-page-scrolled', hidden);
     header.inert = hidden;
     footer.inert = hidden;
     if (hidden) {
