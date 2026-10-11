@@ -1,4 +1,6 @@
 ---
+order: 1
+legacySlug: 01-research-notes
 level: 3
 reading: true
 title: "Research notes"

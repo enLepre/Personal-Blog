@@ -1,4 +1,6 @@
 ---
+order: 3
+legacySlug: 03-reading-notes
 level: 3
 reading: true
 title: "Reading notes"

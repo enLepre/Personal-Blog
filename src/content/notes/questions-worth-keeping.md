@@ -1,4 +1,6 @@
 ---
+order: 2
+legacySlug: 02-questions-worth-keeping
 level: 3
 reading: true
 title: "Questions worth keeping"

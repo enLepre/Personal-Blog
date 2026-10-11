@@ -1,4 +1,6 @@
 ---
+order: 1
+legacySlug: 01-electric-fields
 level: 3
 reading: true
 title: "Electric fields and Chemical Reactions"

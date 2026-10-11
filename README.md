@@ -21,7 +21,7 @@ Each page also supports `reading: true` or `reading: false`. All current level 3
 
 Use standard YAML `level: 3` (one colon), not `level:: 3`.
 
-Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research, Notes and Essays are automatically sorted newest first. Equal dates use the filename as a stable tie-breaker. Dates are metadata and are not displayed, preserving the original design.
+Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research, Notes and Essays are automatically sorted newest first. Equal dates use the optional `order` number (smaller first), then the filename as a stable tie-breaker. Articles without `order` come after numbered articles on the same date. Dates are metadata and are not displayed, preserving the original design.
 
 Use a `preview` field in the frontmatter to control the short description shown on the homepage and section lists:
 
@@ -45,7 +45,7 @@ The homepage shows only the name and landscape. A top-left rhombus rotates into 
 
 ## Automatic publications
 
-The Publications article (`research/02-publications.html`) displays all public works from Enrico Lepre's ORCID record, `0000-0003-4252-3056`. Its Markdown frontmatter enables the list with `publications: true`; the homepage retains only its short preview.
+The Publications article (`research/publications.html`) displays all public works from Enrico Lepre's ORCID record, `0000-0003-4252-3056`. Its Markdown frontmatter enables the list with `publications: true`; the homepage retains only its short preview.
 
 `src/data/publication-sync.json` selects the ORCID record. `pnpm sync:publications` fetches the public works and their details, selects ORCID's preferred record in each group, deduplicates DOIs, and saves newest-first titles, authors, journals, years and links to `src/data/publications.json`. Works without DOIs, journal names, authors or dates remain included using the available metadata. Only public ORCID works can be shown; add missing publications to your ORCID record and make them public. This is not a Google Scholar mirror.
 
@@ -65,3 +65,9 @@ Click its title from the homepage or section page to read it separately.
 The section Markdown files have their existing `research.html`, `notes.html`,
 `essays.html` and `about.html` pages. Section titles on the homepage link to them.
 Paragraph spacing and justification are shared between previews and full articles.
+
+## Content templates and filenames
+
+Each content folder (`pages`, `sections`, `research`, `notes`, `essays`) contains a `template.md` with fields and writing examples specific to that folder. The content loaders explicitly exclude these template files: they never become pages, menu entries, or list entries. For a new article, copy the appropriate template to a descriptive filename, replace its sample fields, and write below the frontmatter. For Home or an existing section, use the template as a guide when editing its existing file; additional sections or standalone pages need routes.
+
+Numeric filename prefixes have been removed. Their tie-breaking order is stored in each article’s `order` field. The optional `legacySlug` field preserves a previous URL through a redirect (for example `01-first-essay` redirects to `first-essay.html`); keep it on the renamed article and omit it on new articles. Current site links use the clean filenames.

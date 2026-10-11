@@ -8,3 +8,10 @@ test('sorts publication dates descending, preserves input, and breaks ties by id
   assert.equal(input[0].id, 'old');
   assert.deepEqual(newestFirst([]), []);
 });
+
+test('Markdown order preserves same-date ordering independently of filenames', () => {
+  const entry = (id, order, date = '2026-10-11') => ({ id, data: { date: new Date(date), order } });
+  const input = [entry('a', 3), entry('z', 1), entry('m', 2), entry('without-order'), entry('newer', 9, '2026-10-12')];
+  assert.deepEqual(newestFirst(input).map(e => e.id), ['newer', 'z', 'm', 'a', 'without-order']);
+  assert.equal(input[0].id, 'a');
+});

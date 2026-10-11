@@ -1,4 +1,6 @@
 ---
+order: 3
+legacySlug: 03-methods-ideas
 level: 3
 reading: true
 title: "Methods & ideas"

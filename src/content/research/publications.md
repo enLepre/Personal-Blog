@@ -1,4 +1,6 @@
 ---
+order: 2
+legacySlug: 02-publications
 level: 3
 reading: true
 title: "Publications"
