@@ -12,6 +12,8 @@ Born in Italy in 1995, moved to Germany in 2019 and to Switzerland in 2024.
 
 I am interested in chemistry, its role in our society and how to use it to solve problems.
 
+In my free time, I like to play music, hike, and think about abstract concepts.
+
 ## CV & contact
 
 
