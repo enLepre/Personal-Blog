@@ -2,7 +2,7 @@
 title: "What makes a good song Good?"
 level: 3
 reading: true
-order: 1
+order: 2
 date: 2026-10-11
 preview: "Someone finding time to listens to it"
 ---
