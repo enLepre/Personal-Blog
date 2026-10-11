@@ -32,7 +32,7 @@ Write the full article below the closing `---`. Lists display only the title, pr
 
 The existing placeholders all use 2026-10-05, the day they were first committed; they are not new publications. Replace these dates when publishing real content. About uses level-two headings to separate its blocks.
 
-The homepage shows only the name and landscape. A top-left rhombus rotates into a square on hover or focus; clicking or activating it expands the square into the navigation panel. Navigation slides the current page upward and the next page in from below, with a stationary footer. Reduced-motion preferences disable the page animation. The original `.html` section and article URLs are preserved. Shared styling lives in `src/styles/global.css`.
+The homepage shows only the name and landscape. A top-left rhombus rotates into a square on hover or focus; clicking or activating it expands the square into the navigation panel. Navigation to a deeper page slides upward; returning to a higher level slides downward (Home → section → article). Same-level navigation follows the router’s normal direction, including browser Back/Forward. The footer stays stationary. Reduced-motion preferences disable the page animation. The original `.html` section and article URLs are preserved. Shared styling lives in `src/styles/global.css`.
 
 ## Automatic publications
 

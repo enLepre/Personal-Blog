@@ -38,3 +38,28 @@ test('menu opens only on activation and supports dismissal and client navigation
   toggle.events.click();
   assert.equal(nav.inert, false);
 });
+
+test('transition direction follows hierarchy for links and browser history', () => {
+  const events = {};
+  const document = { querySelector: () => null, addEventListener(name, handler) { events[name] = handler; } };
+  vm.runInNewContext(readFileSync('src/scripts/navigation.js', 'utf8'), { document, AbortController });
+  const direction = (from, to, initial = 'forward') => {
+    const event = { from: new URL(from, 'https://enlepre.github.io'), to: new URL(to, 'https://enlepre.github.io'), direction: initial };
+    events['astro:before-preparation'](event);
+    return event.direction;
+  };
+  const home = '/Personal-Blog/';
+  const essays = '/Personal-Blog/essays.html';
+  const article = '/Personal-Blog/essays/01-first-essay.html';
+  assert.equal(direction(home, essays), 'forward');
+  assert.equal(direction(essays, article), 'forward');
+  assert.equal(direction(article, essays), 'back');
+  assert.equal(direction(essays, home), 'back');
+  assert.equal(direction(article, home), 'back');
+  assert.equal(direction(article, '/Personal-Blog/index.html'), 'back');
+  assert.equal(direction('/Personal-Blog/index.html', essays), 'forward');
+  assert.equal(direction(essays, article, 'back'), 'forward');
+  assert.equal(direction(essays, '/Personal-Blog/notes.html'), 'forward');
+  assert.equal(direction(essays, '/Personal-Blog/notes.html', 'back'), 'back');
+  assert.equal(direction(essays, essays + '#details', 'back'), 'back');
+});

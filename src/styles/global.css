@@ -183,6 +183,8 @@ html { scroll-behavior: auto; }
 .site-footer { z-index: 600; background: var(--paper); }
 @keyframes page-up-out { from { transform: translateY(0); } to { transform: translateY(-100vh); } }
 @keyframes page-up-in { from { transform: translateY(100vh); } to { transform: translateY(0); } }
+@keyframes page-down-out { from { transform: translateY(0); } to { transform: translateY(100vh); } }
+@keyframes page-down-in { from { transform: translateY(-100vh); } to { transform: translateY(0); } }
 ::view-transition-group(site-footer), ::view-transition-group(site-menu) { z-index: 10; }
 ::view-transition-old(site-footer), ::view-transition-old(site-menu) { display: none; }
 ::view-transition-new(site-footer), ::view-transition-new(site-menu) { animation: none; }

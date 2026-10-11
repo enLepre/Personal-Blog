@@ -34,3 +34,15 @@ document.addEventListener('astro:before-swap', () => {
 });
 document.addEventListener('astro:page-load', initializeMenu);
 initializeMenu();
+
+// Compare hierarchy rather than whether navigation adds a browser history entry.
+// Normalize index.html so both home URLs occupy the same level.
+function pageDepth(url) {
+  return url.pathname.replace(/\/index\.html$/, '/').split('/').filter(Boolean).length;
+}
+document.addEventListener('astro:before-preparation', (event) => {
+  const difference = pageDepth(event.to) - pageDepth(event.from);
+  if (difference < 0) event.direction = 'back';
+  else if (difference > 0) event.direction = 'forward';
+  // At the same level, retain the router's direction (including Back/Forward).
+});
