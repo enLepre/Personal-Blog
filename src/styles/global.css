@@ -164,12 +164,16 @@ nav a{display:block}
 body { padding-top: var(--site-header-height); }
 html { scroll-behavior: auto; }
 .site-header { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 500; padding: 24px 0; pointer-events: none; }
-.menu { position: relative; pointer-events: auto; }
-.menu-toggle { display: flex; align-items: center; gap: 24px; border: 0; padding: 8px 0; background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; cursor: pointer; }
-.menu-toggle span { font-size: 21px; transition: transform .2s ease; }
-.menu.is-open .menu-toggle span { transform: rotate(45deg); }
-.menu nav { position: absolute; top: 100%; left: -20px; display: flex; flex-direction: column; gap: 0; min-width: 238px; padding: 20px; background: var(--paper); border: 1px solid var(--hairline); box-shadow: 0 14px 40px #1111110a; visibility: hidden; opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s, visibility .2s; }
-.menu.is-open nav { visibility: visible; opacity: 1; transform: translateY(0); }
+/* One outlined diamond becomes a square, then grows into the menu surface. */
+.menu { position: relative; width: 44px; height: 44px; pointer-events: auto; }
+.menu::before { content: ''; position: absolute; top: 10px; left: 10px; width: 24px; height: 24px; border: 1px solid var(--ink); background: var(--paper); transform: rotate(45deg); transform-origin: 12px 12px; transition: transform .25s ease, width .4s cubic-bezier(.22,.61,.36,1), height .4s cubic-bezier(.22,.61,.36,1); pointer-events: none; }
+.menu:has(.menu-toggle:hover)::before, .menu:focus-within::before, .menu.is-open::before { transform: rotate(0); }
+.menu.is-open::before { width: min(312px, calc(100vw - 42px)); height: 312px; }
+.menu-toggle { position: relative; z-index: 2; display: block; width: 44px; height: 44px; border: 0; padding: 10px; background: transparent; color: var(--ink); cursor: pointer; }
+.menu-toggle span { display: block; width: 24px; height: 24px; border: 1px solid transparent; transition: border-color .25s; }
+.menu.is-open .menu-toggle span { border-color: var(--ink); }
+.menu nav { position: absolute; top: 44px; left: 10px; display: flex; flex-direction: column; gap: 0; width: min(312px, calc(100vw - 42px)); padding: 12px 24px 20px; visibility: hidden; opacity: 0; transform: translateY(-6px); transition: opacity .15s ease, transform .15s ease, visibility .15s; }
+.menu.is-open nav { visibility: visible; opacity: 1; transform: translateY(0); transition: opacity .2s ease .22s, transform .2s ease .22s, visibility 0s; }
 .menu nav a { padding: 10px 0; font-size: 17px; }
 .menu nav .brand { font-size: 23px; padding-bottom: 20px; margin-bottom: 8px; border-bottom: 1px solid var(--hairline); }
 .menu nav a.is-active { font-style: italic; }
@@ -186,12 +190,11 @@ html { scroll-behavior: auto; }
 @media (max-width: 700px) {
   :root { --site-header-height: 72px; }
   .site-header { width: calc(100% - 32px); padding: 16px 0; }
-  .menu nav { left: 0; }
   .hero { min-height: calc(100svh - var(--site-header-height) - 54px); }
   .hero .page-title { font-size: clamp(48px, 12vw, 84px); }
   .hero .landscape { margin-top: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(page-content), ::view-transition-new(page-content) { animation: none !important; }
-  .menu nav, .menu-toggle span { transition: none; }
+  .menu::before, .menu nav, .menu-toggle span { transition: none; }
 }

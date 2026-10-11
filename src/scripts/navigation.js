@@ -7,18 +7,10 @@ function initializeMenu() {
   const setOpen = (open) => {
     menu.classList.toggle('is-open', open);
     toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
     nav.inert = !open;
   };
-  menu.addEventListener('pointerenter', (event) => {
-    if (event.pointerType === 'mouse') setOpen(true);
-  });
-  menu.addEventListener('pointerleave', (event) => {
-    if (event.pointerType === 'mouse' && !menu.contains(document.activeElement)) setOpen(false);
-  });
-  let openBeforePress = false;
-  toggle.addEventListener('pointerdown', () => { openBeforePress = menu.classList.contains('is-open'); });
-  toggle.addEventListener('click', (event) => setOpen(event.detail === 0 ? !menu.classList.contains('is-open') : !openBeforePress));
-  toggle.addEventListener('focus', () => setOpen(true));
+  toggle.addEventListener('click', () => setOpen(!menu.classList.contains('is-open')));
   menu.addEventListener('focusout', (event) => {
     if (!menu.contains(event.relatedTarget)) setOpen(false);
   });

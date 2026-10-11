@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 
-test('menu supports hover, touch, keyboard dismissal, and client navigation', () => {
+test('menu opens only on activation and supports dismissal and client navigation', () => {
   const makeElement = () => ({
     dataset: {}, events: {}, attrs: {}, classes: new Set(),
     addEventListener(name, handler) { this.events[name] = handler; },
@@ -16,26 +16,25 @@ test('menu supports hover, touch, keyboard dismissal, and client navigation', ()
   menu.querySelector = selector => selector === 'nav' ? nav : toggle;
   const document = { activeElement: null, events: {}, querySelector: () => menu, addEventListener(name, handler) { this.events[name] = handler; } };
   vm.runInNewContext(readFileSync('src/scripts/navigation.js', 'utf8'), { document, AbortController });
-  menu.events.pointerenter({ pointerType: 'mouse' });
-  assert.equal(toggle.attrs['aria-expanded'], 'true');
-  assert.equal(nav.inert, false);
-  menu.events.pointerleave({ pointerType: 'mouse' });
-  assert.equal(nav.inert, true);
-  // Touch focus occurs before click; the first tap must still open the menu.
-  toggle.events.pointerdown(); toggle.focus(); toggle.events.click({ detail: 1 });
-  assert.equal(nav.inert, false);
-  toggle.events.pointerdown(); toggle.events.click({ detail: 1 });
-  assert.equal(nav.inert, true);
+  // Focus alone must not reveal the links; click/tap or keyboard activation does.
   toggle.focus();
+  assert.equal(menu.classes.has('is-open'), false);
+  toggle.events.click();
+  assert.equal(toggle.attrs['aria-expanded'], 'true');
+  assert.equal(toggle.attrs['aria-label'], 'Close navigation');
+  assert.equal(nav.inert, false);
+  toggle.events.click();
+  assert.equal(nav.inert, true);
+  toggle.events.click();
   menu.events.keydown({ key: 'Escape' });
   assert.equal(nav.inert, true);
   assert.equal(document.activeElement, toggle);
-  menu.events.pointerenter({ pointerType: 'mouse' });
+  toggle.events.click();
   document.events.pointerdown({ target: {} });
   assert.equal(nav.inert, true);
   document.events['astro:before-swap']();
   menu.dataset = {};
   document.events['astro:page-load']();
-  toggle.events.pointerdown(); toggle.events.click({ detail: 1 });
+  toggle.events.click();
   assert.equal(nav.inert, false);
 });
