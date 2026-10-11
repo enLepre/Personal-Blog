@@ -4,7 +4,7 @@ level: 3
 reading: true
 order: 1
 date: 2026-10-11
-preview: "The one someone finds time to listens to"
+preview: "Someone finding time to listens to it"
 ---
 
 I love music. I like listening to my Kid A vinyl as much as I love cranking up Taylor Swift on Spotify. There is hardly any genre I dislike, given the right context. Sometimes, the right context is just time passing by, music ageing, and perspectives changing.
