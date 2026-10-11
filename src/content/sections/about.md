@@ -16,10 +16,11 @@ I am interested in chemistry, its role in our society and how to use it to solve
 
 In my free time, I like to play music, hike, and think about abstract concepts.
 
-## CV & contact
+## Curriculum
 
+[ORCID](https://orcid.org/0000-0003-4252-3056)
 
-enrico.lepre@chem.uzh.ch
+[Google Scholar](https://scholar.google.com/citations?user=AEkJFvIAAAAJ&hl=it)
 
 2024 - University of Zurich (Postdoc, Physical Chemistry)
 
@@ -29,5 +30,8 @@ enrico.lepre@chem.uzh.ch
 
 2014 to 2019 - Università degli Studi di Trieste (Bachelor and Master Degree, Chemistry) 
 
+## Contacts
 
+enrico.lepre@chem.uzh.ch
 
+[LinkedIn](https://www.linkedin.com/in/enrico-lepre-42178bb3/)
