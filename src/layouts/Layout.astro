@@ -35,7 +35,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <div class="menu">
       <button class="menu-toggle" aria-expanded="false" aria-controls="main-menu" aria-label="Open navigation"><span aria-hidden="true"></span></button>
       <nav id="main-menu" aria-label="Main navigation" inert>
-        <a class="brand" href={`${base}/`} data-nav="home">{homeEntry.data.title}</a>
+        <a class="brand" href={`${base}/`} data-nav="home">{homeEntry.data.menuTitle}</a>
         {['research', 'notes', 'essays', 'about'].map(id => <a href={`${base}/${id}.html`} data-nav={id} class:list={{ 'is-active': !home && id === section }} aria-current={!home && id === section ? 'page' : undefined}>{sectionTitle(id)}</a>)}
       </nav>
     </div>

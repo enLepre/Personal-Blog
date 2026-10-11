@@ -7,7 +7,7 @@ const dated = (name: string) => defineCollection({
 export const collections = {
   pages: defineCollection({
     loader: glob({ pattern: ['*.md', '!template.md'], base: './src/content/pages' }),
-    schema: z.object({ title: z.string(), level: z.number().int().positive(), reading: z.boolean().default(false), image: z.string(), imageAlt: z.string(), footer: z.string() })
+    schema: z.object({ title: z.string(), level: z.number().int().positive(), reading: z.boolean().default(false), menuTitle: z.string().default('Enrico Lepre'), image: z.string(), imageAlt: z.string(), footer: z.string() })
   }),
   research: dated('research'), notes: dated('notes'), essays: dated('essays'),
   sections: defineCollection({

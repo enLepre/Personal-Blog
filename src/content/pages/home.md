@@ -1,4 +1,5 @@
 ---
+menuTitle: Enrico Lepre
 level: 1
 reading: false
 title: Chemistry, Fields, and Catalysis

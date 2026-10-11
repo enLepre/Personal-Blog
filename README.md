@@ -9,7 +9,7 @@ Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previ
 
 ## Edit content
 
-- `src/content/pages/home.md`: home name, image, footer, optional Markdown body, and hierarchy.
+- `src/content/pages/home.md`: Home title, separate `menuTitle`, image, footer, optional Markdown body, and hierarchy.
 - `src/content/research/*.md`: research entries.
 - `src/content/notes/*.md`: notes, with optional `status`.
 - `src/content/essays/*.md`: essays.
