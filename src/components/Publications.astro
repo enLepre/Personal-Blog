@@ -23,10 +23,10 @@ const years = [...new Set(publications.map(paper => paper.year).filter(Boolean))
       {publications.map(paper => <li class="publication" data-year={paper.year}>
         <time>{paper.year || 'n.d.'}</time>
         <div class="publication-details">
-          <h2><a href={paper.url}>{paper.title}</a></h2>
+          <h2><a href={paper.url} target="_blank" rel="noopener noreferrer">{paper.title}</a></h2>
           {paper.authors && <p class="publication-authors">{paper.authors}</p>}
           {paper.journal && <p>{paper.journal}</p>}
-          {paper.doi && <a class="publication-doi" href={paper.url}>doi.org/{paper.doi} ↗</a>}
+          {paper.doi && <a class="publication-doi" href={paper.url} target="_blank" rel="noopener noreferrer">doi.org/{paper.doi} ↗</a>}
         </div>
       </li>)}
     </ol>
