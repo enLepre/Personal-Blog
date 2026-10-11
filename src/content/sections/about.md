@@ -18,10 +18,6 @@ In my free time, I like to play music, hike, and think about abstract concepts.
 
 ## Curriculum
 
-[ORCID](https://orcid.org/0000-0003-4252-3056)
-
-[Google Scholar](https://scholar.google.com/citations?user=AEkJFvIAAAAJ&hl=it)
-
 2024 - University of Zurich (Postdoc, Physical Chemistry)
 
 2023 - Hte gmbh (Postdoc, Process Chemistry)
@@ -35,3 +31,7 @@ In my free time, I like to play music, hike, and think about abstract concepts.
 enrico.lepre@chem.uzh.ch
 
 [LinkedIn](https://www.linkedin.com/in/enrico-lepre-42178bb3/)
+
+[ORCID](https://orcid.org/0000-0003-4252-3056)
+
+[Google Scholar](https://scholar.google.com/citations?user=AEkJFvIAAAAJ&hl=it)
