@@ -236,7 +236,8 @@ body[data-reading="true"].is-reading-scrolled .site-footer {
 /* Match the blank-line spacing between the About page paragraphs. */
 .about-content .item h2 { margin-bottom: 21.25px; }
 
-.section-heading.has-portrait { display: grid; grid-template-columns: minmax(0, 1fr) 200px; align-items: start; gap: 40px; margin-bottom: 66px; }
+.section-heading.has-portrait { display: grid; grid-template-columns: minmax(0, 1fr) 200px; align-items: end; gap: 40px; margin-bottom: 66px; }
+.section-heading.has-portrait .page-title { margin-bottom: 0; }
 .section-heading.has-portrait .lead { margin-bottom: 0; }
 .section-portrait { display: block; width: 100%; height: auto; }
 @media (max-width: 600px) {
