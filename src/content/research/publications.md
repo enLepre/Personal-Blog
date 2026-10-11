@@ -1,5 +1,5 @@
 ---
-order: 2
+order: 2000
 legacySlug: 02-publications
 level: 3
 reading: true
