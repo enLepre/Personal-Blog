@@ -18,10 +18,9 @@ body{
   text-rendering:optimizeLegibility;
 }
 a{color:inherit;text-decoration:none}
-a:hover{text-decoration:underline;text-underline-offset:4px}
-/* Content links remain identifiable before hover or keyboard focus. */
-.page-stage a[href]{text-decoration:underline;text-underline-offset:.18em;text-decoration-thickness:1px;text-decoration-skip-ink:auto}
-.page-stage a[href]:hover{ text-decoration-thickness:2px }
+/* Only links inside Markdown text have an underline. */
+.prose a[href]{text-decoration:underline;text-underline-offset:.18em;text-decoration-thickness:1px;text-decoration-skip-ink:auto}
+.prose a[href]:hover{ text-decoration-thickness:2px }
 .shell{width:min(calc(100% - 48px),var(--max));margin:0 auto}
 .site-header{
   display:flex;
