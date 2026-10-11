@@ -232,3 +232,6 @@ body[data-reading="true"].is-reading-scrolled .site-footer {
   body[data-reading="true"] .site-header,
   body[data-reading="true"] .site-footer { transition: none; }
 }
+
+/* Match the blank-line spacing between the About page paragraphs. */
+.about-content .item h2 { margin-bottom: 21.25px; }
