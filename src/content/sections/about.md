@@ -10,7 +10,7 @@ lead: ""
 
 ## Biography
 
-Born in Italy in 1995, moved to Germany in 2019 and to Switzerland in 2024. 
+I was born in Italy in 1995, moved to Germany in 2019 and to Switzerland in 2024.
 
 I am interested in chemistry, its role in our society and how to use it to solve problems.
 
@@ -18,13 +18,13 @@ In my free time, I like to play music, hike, and think about abstract concepts.
 
 ## Curriculum
 
-2024 - University of Zurich (Postdoc, Physical Chemistry)
+2024–present — University of Zurich (Postdoc in Physical Chemistry)
 
-2023 - Hte gmbh (Postdoc, Process Chemistry)
+2023 — hte GmbH (Postdoc in Process Chemistry)
 
-2019 to 2023 - Max Plank Institute of Colloids and Interfaces (PhD, Materials Science)
+2019–2023 — Max Planck Institute of Colloids and Interfaces (PhD in Materials Science)
 
-2014 to 2019 - Università degli Studi di Trieste (Bachelor and Master Degree, Chemistry) 
+2014–2019 — Università degli Studi di Trieste (Bachelor's and Master's degrees in Chemistry)
 
 ## Contacts
 
