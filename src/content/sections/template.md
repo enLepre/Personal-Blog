@@ -10,7 +10,7 @@ preview: "An optional short plain-text description."
 ---
 
 <!-- This template is excluded from the website.
-Use it to edit research.md, notes.md, essays.md, or about.md in this folder.
+Use it to edit research.md, notes.md, or about.md in this folder.
 Keep these filenames: the site uses them to identify the existing sections.
 Additional section filenames need a corresponding route and navigation entry.
 The Markdown body appears before the article list; About displays its full body.

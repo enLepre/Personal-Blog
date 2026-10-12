@@ -19,7 +19,7 @@ const sectionTitle = (id: string) => sections.find(entry => entry.id === id)?.da
 const home = section === 'home';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const publicationEntry = await getEntry('research', 'publications');
-const menuItems = ['research', 'publications', 'essays', 'notes', 'about'].map(id => ({
+const menuItems = ['research', 'publications', 'notes', 'about'].map(id => ({
   id,
   label: id === 'publications' ? publicationEntry?.data.title || 'Publications' : sectionTitle(id),
   href: `${base}/${id === 'publications' ? 'research/publications' : id}.html`,
@@ -35,7 +35,7 @@ const publicationPage = Astro.url.pathname === `${base}/research/publications.ht
   <meta name="color-scheme" content="light" />
   <meta name="generator" content={Astro.generator} />
   <title>{home ? homeEntry.data.title : `${title || sectionTitle(section)} — ${homeEntry.data.title}`}</title>
-  <meta name="description" content="Research, notes and essays by Enrico Lepre." />
+  <meta name="description" content="Research and notes by Enrico Lepre." />
 </head>
 <body id="top" data-page={section} data-page-level={level} data-reading={String(reading)}>
   <header class="site-header shell" transition:name="site-menu" transition:animate="none">

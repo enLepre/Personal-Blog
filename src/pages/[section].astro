@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getEntry } from 'astro:content';
 import SectionContent from '../components/SectionContent.astro';
 export function getStaticPaths() {
-  return ['research', 'notes', 'essays', 'about'].map(section => ({ params: { section } }));
+  return ['research', 'notes', 'about'].map(section => ({ params: { section } }));
 }
 const { section } = Astro.params;
 const entry = await getEntry('sections', section!);

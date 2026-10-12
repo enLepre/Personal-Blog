@@ -11,8 +11,7 @@ Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previ
 
 - `src/content/pages/home.md`: Home title, separate `menuTitle`, image, footer, optional Markdown body, and hierarchy.
 - `src/content/research/*.md`: research entries.
-- `src/content/notes/*.md`: notes, with optional `status`.
-- `src/content/essays/*.md`: essays.
+- `src/content/notes/*.md`: all notes and longer pieces, with optional `status`.
 - `src/content/sections/*.md`: section titles and introductions; `about.md` also contains the biography and contact text.
 
 Every page Markdown file requires a positive integer `level` in its YAML frontmatter. Use `level: 1` for Home, `level: 2` for sections, and `level: 3` for articles. A larger destination level slides upward; a smaller destination level slides downward, even when going directly from an article to Home or using browser history. Equal levels retain the router’s normal direction. Change these numbers to customize hierarchy; URLs do not determine the animation.
@@ -21,7 +20,7 @@ Each page also supports `reading: true` or `reading: false`. All current level 3
 
 Use standard YAML `level: 3` (one colon), not `level:: 3`.
 
-Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research, Notes and Essays are automatically sorted newest first. Equal dates use the optional `order` number (smaller first), then the filename as a stable tie-breaker. Articles without `order` come after numbered articles on the same date. Dates are metadata and are not displayed, preserving the original design.
+Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research and Notes are automatically sorted newest first. Equal dates use the optional `order` number (smaller first), then the filename as a stable tie-breaker. Articles without `order` come after numbered articles on the same date. Dates are metadata and are not displayed, preserving the original design.
 
 Use a `preview` field in the frontmatter to control the short description shown on the homepage and section lists:
 
@@ -59,18 +58,19 @@ Every push to `main` runs `.github/workflows/pages.yml`: install from the lockfi
 
 ## Individual article pages
 
-Every Markdown entry in Research, Notes and Essays generates its own URL:
+Every Markdown entry in Research and Notes generates its own URL:
 `/Personal-Blog/<collection>/<filename-without-md>.html`.
 Click its title from the homepage or section page to read it separately.
 The section Markdown files have their existing `research.html`, `notes.html`,
-`essays.html` and `about.html` pages. Section titles on the homepage link to them.
+and `about.html` pages. The navigation links to them. The former Essays section
+and its articles redirect to Notes and the corresponding Note articles, preserving existing links.
 Paragraph spacing and justification are shared between previews and full articles.
 
 ## Content templates and filenames
 
-Each content folder (`pages`, `sections`, `research`, `notes`, `essays`) contains a `template.md` with fields and writing examples specific to that folder. The content loaders explicitly exclude these template files: they never become pages, menu entries, or list entries. For a new article, copy the appropriate template to a descriptive filename, replace its sample fields, and write below the frontmatter. For Home or an existing section, use the template as a guide when editing its existing file; additional sections or standalone pages need routes.
+Each content folder (`pages`, `sections`, `research`, `notes`) contains a `template.md` with fields and writing examples specific to that folder. The content loaders explicitly exclude these template files: they never become pages, menu entries, or list entries. For a new article, copy the appropriate template to a descriptive filename, replace its sample fields, and write below the frontmatter. For Home or an existing section, use the template as a guide when editing its existing file; additional sections or standalone pages need routes.
 
-Numeric filename prefixes have been removed. Their tie-breaking order is stored in each article’s `order` field. The optional `legacySlug` field preserves a previous URL through a redirect (for example `01-first-essay` redirects to `first-essay.html`); keep it on the renamed article and omit it on new articles. Current site links use the clean filenames.
+Numeric filename prefixes have been removed. Their tie-breaking order is stored in each article’s `order` field. The optional `legacySlug` field preserves a previous URL through a redirect (for example `01-first-note` redirects to `first-note.html`); keep it on the renamed article and omit it on new articles. Current site links use the clean filenames.
 
 External web links in Markdown (including HTML links) and the publication list open in a new browser tab or window. Internal links retain normal page navigation. No extra Markdown properties are required for this behavior.
 

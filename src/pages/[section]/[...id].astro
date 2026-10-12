@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import Publications from '../../components/Publications.astro';
 import { articleHref } from '../../lib/urls.mjs';
 export async function getStaticPaths() {
-  const sections = ['research', 'notes', 'essays'] as const;
+  const sections = ['research', 'notes'] as const;
   const routes = await Promise.all(sections.map(async section =>
     (await getCollection(section)).flatMap(entry => [
       { params: { section, id: entry.id }, props: { entry, section, legacy: false } },

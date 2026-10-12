@@ -9,7 +9,7 @@ export const collections = {
     loader: glob({ pattern: ['*.md', '!template.md'], base: './src/content/pages' }),
     schema: z.object({ title: z.string(), level: z.number().int().positive(), reading: z.boolean().default(false), menuTitle: z.string().default('Enrico Lepre'), image: z.string(), imageAlt: z.string(), footer: z.string() })
   }),
-  research: dated('research'), notes: dated('notes'), essays: dated('essays'),
+  research: dated('research'), notes: dated('notes'),
   sections: defineCollection({
     loader: glob({ pattern: ['*.md', '!template.md'], base: './src/content/sections' }),
     schema: z.object({ title: z.string(), level: z.number().int().positive(), reading: z.boolean().default(false), portrait: z.string().optional(), portraitAlt: z.string().default('Portrait'), lead: z.string().default(''), preview: z.string().trim().default('') })
