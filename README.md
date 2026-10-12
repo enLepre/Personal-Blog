@@ -44,7 +44,7 @@ The homepage shows only the name and landscape. A top-left rhombus rotates into 
 
 ## Automatic publications
 
-The Publications article (`research/publications.html`) displays all public works from Enrico Lepre's ORCID record, `0000-0003-4252-3056`. Its Markdown frontmatter enables the list with `publications: true`; the homepage retains only its short preview.
+The Publications section (`publications.html`, level 2) displays all public works from Enrico Lepre's ORCID record, `0000-0003-4252-3056`. Its title and introduction are in `src/content/sections/publications.md`. It is independent of Research; the former `research/publications.html` and `research/02-publications.html` URLs redirect to it.
 
 `src/data/publication-sync.json` selects the ORCID record. `pnpm sync:publications` fetches the public works and their details, selects ORCID's preferred record in each group, deduplicates DOIs, and saves newest-first titles, authors, journals, years and links to `src/data/publications.json`. Works without DOIs, journal names, authors or dates remain included using the available metadata. Only public ORCID works can be shown; add missing publications to your ORCID record and make them public. This is not a Google Scholar mirror.
 

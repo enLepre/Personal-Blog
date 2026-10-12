@@ -18,13 +18,11 @@ const sections = await getCollection('sections');
 const sectionTitle = (id: string) => sections.find(entry => entry.id === id)?.data.title || id;
 const home = section === 'home';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const publicationEntry = await getEntry('research', 'publications');
 const menuItems = ['research', 'publications', 'notes', 'about'].map(id => ({
   id,
-  label: id === 'publications' ? publicationEntry?.data.title || 'Publications' : sectionTitle(id),
-  href: `${base}/${id === 'publications' ? 'research/publications' : id}.html`,
+  label: sectionTitle(id),
+  href: `${base}/${id}.html`,
 }));
-const publicationPage = Astro.url.pathname === `${base}/research/publications.html`;
 ---
 <!doctype html>
 <html lang="en">
@@ -47,7 +45,7 @@ const publicationPage = Astro.url.pathname === `${base}/research/publications.ht
       <nav id="main-menu" aria-label="Main navigation" inert>
         <a class="brand" href={`${base}/`} data-nav="home">{homeEntry.data.menuTitle}</a>
         {menuItems.map(({ id, label, href }) => {
-          const active = id === 'publications' ? publicationPage : !home && !publicationPage && id === section;
+          const active = !home && id === section;
           return <a href={href} data-nav={id} class:list={{ 'is-active': active }} aria-current={active ? 'page' : undefined}>{label}</a>;
         })}
       </nav>

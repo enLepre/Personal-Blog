@@ -5,4 +5,6 @@ export default defineConfig({ site: 'https://enlepre.github.io', base: '/Persona
   '/essays': '/Personal-Blog/notes.html',
   '/essays/good-song': '/Personal-Blog/notes/good-song.html',
   '/essays/mistakes': '/Personal-Blog/notes/mistakes.html',
+  '/research/publications': '/Personal-Blog/publications.html',
+  '/research/02-publications': '/Personal-Blog/publications.html',
 }, markdown: { rehypePlugins: [aboutSections, [externalLinks, { site: 'https://enlepre.github.io' }]] }, build: { format: 'file' } });
