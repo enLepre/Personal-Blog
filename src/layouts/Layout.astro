@@ -34,6 +34,9 @@ const publicationPage = Astro.url.pathname === `${base}/research/publications.ht
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <meta name="generator" content={Astro.generator} />
+  <link rel="icon" href={`${base}/favicon.ico`} sizes="32x32" />
+  <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} sizes="any" />
+  <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} sizes="180x180" />
   <title>{home ? homeEntry.data.title : `${title || sectionTitle(section)} — ${homeEntry.data.title}`}</title>
   <meta name="description" content="Research and notes by Enrico Lepre." />
 </head>
