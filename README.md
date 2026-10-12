@@ -2,7 +2,13 @@
 
 Static Astro website, published at https://enlepre.github.io/Personal-Blog/.
 
-## Develop
+## Homepage animation and restoration
+
+The homepage scrolls through the landscape, a pinned title, and sequential links to Research, Publications, Notes and About. Their subtitles come from the existing section Markdown. Hovering or focusing a section title rotates its rhombus and expands an outline around the title. Reduced-motion preferences and short screens use a normal flowing layout.
+
+The original homepage is preserved unchanged in `src/components/OriginalHomepage.astro`. To restore it, set `homepageAnimation: false` in `src/content/pages/home.md`; set it to `true` to re-enable the animation. Both use the same original homepage content and image.
+
+## Development commands
 
 Use Node.js 24 or newer. Run `corepack enable` and `pnpm install --frozen-lockfile`, then `pnpm run dev`.
 Run `pnpm test` and `pnpm run build` before publishing. `pnpm run preview` previews the production build.

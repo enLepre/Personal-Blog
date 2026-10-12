@@ -2,6 +2,7 @@
 menuTitle: Enrico Lepre
 level: 1
 reading: false
+homepageAnimation: true
 title: Chemistry, Fields, and Catalysis
 image: /assets/landscape-highres.png?v=complete-2
 imageAlt: Mountain landscape with a handwritten note

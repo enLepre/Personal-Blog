@@ -1,0 +1,117 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getEntry, render } from 'astro:content';
+const home = await getEntry('pages', 'home');
+if (!home) throw new Error('Missing pages/home.md');
+const { Content } = await render(home);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const sections = await Promise.all(['research', 'publications', 'notes', 'about'].map(async id => {
+  const entry = await getEntry('sections', id);
+  if (!entry) throw new Error(`Missing section: ${id}`);
+  return { id, title: entry.data.title, subtitle: entry.data.lead || entry.data.preview };
+}));
+---
+<Layout level={home.data.level} reading={home.data.reading}>
+  <main class="home-scroll" data-home-scroll>
+    <div class="home-stage">
+      <div class="home-composition">
+        <h1 class="home-title">{home.data.title}</h1>
+        <img class="home-landscape" src={`${base}${home.data.image}`} alt={home.data.imageAlt} width="1575" height="999" fetchpriority="high" />
+        <ol class="home-sections" aria-label="Explore the website">
+          {sections.map(({id, title, subtitle}) => <li class="home-section">
+            <h2><a class="section-link" href={`${base}/${id}.html`}><span class="section-diamond" aria-hidden="true"></span><span>{title}</span></a></h2>
+            {subtitle && <p>{subtitle}</p>}
+          </li>)}
+        </ol>
+        <div class="home-body prose"><Content /></div>
+      </div>
+      <span class="scroll-hint" aria-hidden="true">Scroll to explore <span>↓</span></span>
+    </div>
+  </main>
+</Layout>
+<style>
+  .home-stage { width: min(calc(100% - 48px), 1120px); margin: auto; padding: 45px 0 80px; }
+  .home-composition { width: min(860px, 100%); margin: auto; }
+  .home-title { margin: 0; text-align: center; font-size: clamp(48px, 9vw, 104px); font-weight: 400; line-height: .95; letter-spacing: -.055em; }
+  .home-landscape { display: block; width: min(560px, 100%); height: auto; max-height: 48svh; object-fit: contain; margin: 44px auto 0; }
+  .home-sections { list-style: none; padding: 0; width: min(700px, 100%); margin: 64px auto 0; }
+  .home-section { padding: 18px 0; border-bottom: 1px solid var(--hairline); }
+  .home-section h2 { margin: 0 0 8px; font-size: clamp(23px, 3vw, 29px); font-weight: 400; letter-spacing: -.02em; }
+  .home-section p { margin: 0 0 0 44px; color: var(--muted); font-size: 17px; line-height: 1.5; }
+  .section-link { position: relative; display: inline-flex; align-items: center; min-height: 44px; gap: 26px; padding-right: 16px; }
+  .section-diamond { position: relative; flex: 0 0 18px; width: 18px; height: 18px; }
+  .section-diamond::before { content: ''; position: absolute; width: 14px; height: 14px; top: 2px; left: 2px; border: 1px solid var(--ink); transform: rotate(45deg); transition: transform .25s ease; }
+  .section-link::after { content: ''; position: absolute; inset: 0 -8px 0 -12px; border: 1px solid var(--ink); transform: scaleX(.08); transform-origin: left; opacity: 0; transition: transform .4s cubic-bezier(.22,.61,.36,1), opacity .2s ease; pointer-events: none; }
+  .section-link:hover .section-diamond::before, .section-link:focus-visible .section-diamond::before { transform: rotate(0); }
+  .section-link:hover::after, .section-link:focus-visible::after { transform: scaleX(1); opacity: 1; }
+  .home-body { margin-top: 24px; }
+  .scroll-hint { display: none; }
+  .home-scroll.is-animated { height: 400svh; }
+  .is-animated .home-stage { position: sticky; top: 0; height: 100svh; padding: 0; overflow: hidden; }
+  .is-animated .home-composition { position: relative; height: 100%; }
+  .is-animated .home-title { position: absolute; z-index: 3; top: 18%; width: 100%; transform-origin: center top; }
+  .is-animated .home-landscape { position: absolute; z-index: 1; top: 43%; left: 50%; margin: 0; transform: translateX(-50%); opacity: .55; }
+  .is-animated .home-sections { position: absolute; z-index: 4; top: 24%; left: 50%; transform: translateX(-50%); margin: 0; }
+  .is-animated .home-section { opacity: 0; visibility: hidden; transform: translateY(38px); }
+  .is-animated .home-body { position: absolute; top: 88%; width: 100%; }
+  .is-animated .scroll-hint { display: block; position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: .04em; }
+  .scroll-hint span { margin-left: 12px; }
+  @media (max-width: 600px) {
+    .home-stage { width: calc(100% - 36px); }
+    .home-title { font-size: clamp(44px, 11vw, 66px); }
+    .home-section { padding: 12px 0; }
+    .home-section p { font-size: 15px; line-height: 1.4; }
+    .is-animated .home-sections { top: 23%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .section-diamond::before, .section-link::after { transition: none; } }
+</style>
+<script>
+  let cleanup = () => {};
+  function initializeHomepage() {
+    cleanup();
+    const root = document.querySelector<HTMLElement>('[data-home-scroll]');
+    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const stage = root.querySelector<HTMLElement>('.home-stage')!;
+    const title = root.querySelector<HTMLElement>('.home-title')!;
+    const image = root.querySelector<HTMLElement>('.home-landscape')!;
+    const hint = root.querySelector<HTMLElement>('.scroll-hint')!;
+    const rows = [...root.querySelectorAll<HTMLElement>('.home-section')];
+    const controller = new AbortController();
+    const clamp = (n: number) => Math.max(0, Math.min(1, n));
+    const ease = (n: number) => n * n * (3 - 2 * n);
+    let frame = 0;
+    if (innerHeight < 620) return;
+    root.classList.add('is-animated');
+    if (root.querySelector<HTMLElement>('.home-sections')!.offsetHeight > innerHeight * .7) {
+      root.classList.remove('is-animated');
+      return;
+    }
+    function update() {
+      frame = 0;
+      const height = stage.clientHeight;
+      const progress = Math.max(0, -root.getBoundingClientRect().top) / height;
+      const rise = clamp(progress / .8);
+      image.style.transform = `translate(-50%, ${-rise * height * .65}px)`;
+      image.style.opacity = String((.55 + .45 * rise) * (1 - ease(clamp((progress - .8) / .3))));
+      image.style.visibility = progress >= 1.1 ? 'hidden' : 'visible';
+      const settle = ease(clamp((progress - .8) / .4));
+      title.style.transform = `translateY(${-settle * height * .14}px) scale(${1 - settle * .48})`;
+      hint.style.opacity = String(1 - clamp(progress * 4));
+      rows.forEach((row, i) => {
+        const reveal = ease(clamp((progress - 1.2 - i * .42) / .38));
+        row.style.opacity = String(reveal);
+        row.style.visibility = reveal > 0 ? 'visible' : 'hidden';
+        row.style.transform = `translateY(${(1 - reveal) * 38}px)`;
+        row.inert = reveal < .95;
+      });
+    }
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    window.addEventListener('scroll', schedule, { passive: true, signal: controller.signal });
+    window.addEventListener('resize', schedule, { signal: controller.signal });
+    update();
+    cleanup = () => { controller.abort(); cancelAnimationFrame(frame); };
+  }
+  document.addEventListener('astro:before-swap', () => cleanup());
+  document.addEventListener('astro:page-load', initializeHomepage);
+  initializeHomepage();
+</script>
