@@ -117,6 +117,9 @@ nav a{display:block}
   padding:22px 0;
   border-bottom:1px solid var(--hairline);
 }
+.note-list li > div > a{
+  font-size:21px;
+}
 .note-list span:last-child{
   color:var(--muted);
   font-size:14px;
