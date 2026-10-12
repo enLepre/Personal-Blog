@@ -19,10 +19,8 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
         <img class="home-landscape" src={`${base}${home.data.image}`} alt={home.data.imageAlt} width="1575" height="999" fetchpriority="high" />
         <ol class="home-sections" aria-label="Explore the website">
           {sections.map(({id, title, subtitle}) => <li class="home-section">
-            <a class="section-link" href={`${base}/${id}.html`}>
-              <h2><span class="section-diamond" aria-hidden="true"></span><span>{title}</span></h2>
-              {subtitle && <p>{subtitle}</p>}
-            </a>
+            <h2><a class="section-link" href={`${base}/${id}.html`}><span class="section-diamond" aria-hidden="true"></span><span>{title}</span></a></h2>
+            {subtitle && <p>{subtitle}</p>}
           </li>)}
         </ol>
         <div class="home-body prose"><Content /></div>
@@ -37,13 +35,13 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
   .home-title { margin: 0; text-align: center; font-size: clamp(48px, 9vw, 104px); font-weight: 400; line-height: .95; letter-spacing: -.055em; }
   .home-landscape { display: block; width: min(560px, 100%); height: auto; max-height: 48svh; object-fit: contain; margin: 44px auto 0; }
   .home-sections { list-style: none; padding: 0; width: min(700px, 100%); margin: 64px auto 0; }
-  .home-section { border-bottom: 1px solid var(--hairline); }
-  .home-section h2 { display: flex; align-items: center; gap: 26px; min-height: 44px; margin: 0 0 8px; font-size: clamp(23px, 3vw, 29px); font-weight: 400; letter-spacing: -.02em; }
+  .home-section { padding: 18px 0; border-bottom: 1px solid var(--hairline); }
+  .home-section h2 { margin: 0 0 8px; font-size: clamp(23px, 3vw, 29px); font-weight: 400; letter-spacing: -.02em; }
   .home-section p { margin: 0 0 0 44px; color: var(--muted); font-size: 17px; line-height: 1.5; }
-  .section-link { position: relative; display: block; padding: 18px 0; }
+  .section-link { position: relative; display: inline-flex; align-items: center; min-height: 44px; gap: 26px; padding-right: 16px; }
   .section-diamond { position: relative; flex: 0 0 18px; width: 18px; height: 18px; }
   .section-diamond::before { content: ''; position: absolute; width: 14px; height: 14px; top: 2px; left: 2px; border: 1px solid var(--ink); transform: rotate(45deg); transition: transform .25s ease; }
-  .section-link::after { content: ''; position: absolute; inset: 0; border: 1px solid var(--ink); transform: scaleX(.08); transform-origin: left; opacity: 0; transition: transform .4s cubic-bezier(.22,.61,.36,1), opacity .2s ease; pointer-events: none; }
+  .section-link::after { content: ''; position: absolute; inset: 0 -8px 0 -12px; border: 1px solid var(--ink); transform: scaleX(.08); transform-origin: left; opacity: 0; transition: transform .4s cubic-bezier(.22,.61,.36,1), opacity .2s ease; pointer-events: none; }
   .section-link:hover .section-diamond::before, .section-link:focus-visible .section-diamond::before { transform: rotate(0); }
   .section-link:hover::after, .section-link:focus-visible::after { transform: scaleX(1); opacity: 1; }
   .home-body { margin-top: 24px; }
@@ -62,7 +60,7 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
   @media (max-width: 600px) {
     .home-stage { width: calc(100% - 36px); }
     .home-title { font-size: clamp(44px, 11vw, 66px); }
-    .section-link { padding: 12px 0; }
+    .home-section { padding: 12px 0; }
     .home-section p { font-size: 15px; line-height: 1.4; }
     .is-animated .home-sections { top: 23%; }
   }
