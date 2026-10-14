@@ -59,9 +59,12 @@ function initializeScrollControls() {
   const footer = document.querySelector('.site-footer');
   if (!header || !footer) return;
   body.dataset.scrollControlsReady = 'true';
+  let lastHidden;
   const update = () => {
     if (document.body !== body) return;
     const hidden = window.scrollY > 48;
+    if (hidden === lastHidden) return;
+    lastHidden = hidden;
     body.classList.toggle('is-page-scrolled', hidden);
     header.inert = hidden;
     footer.inert = hidden;

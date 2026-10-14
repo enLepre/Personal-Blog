@@ -83,3 +83,5 @@ External web links in Markdown (including HTML links) and the publication list o
 The About page uses `portrait` and `portraitAlt` in `src/content/sections/about.md` to display a photograph beside the title at the top-right. Its current local image (`public/assets/enrico-lepre.jpg`) is the supplied `IMG_1544.JPG`; removing `portrait` restores the text-only heading.
 
 The home image uses `public/assets/landscape-highres.png` (1575 × 999), enhanced with the built-in image tool from the original 560 × 355 drawing. Prompt: improve resolution and clarity while preserving the mountain silhouettes, river, sparse pen strokes, white background, composition, and handwritten “Same questions, a wider landscape.” note.
+
+The animated homepage and About portrait use `OptimizedImage.astro` to generate responsive WebP images during the build, using Sharp. The original assets and Markdown paths remain editable; browsers choose an image size appropriate for the screen. The homepage animation measures layout on initialization and resize instead of every scroll frame. Menu/footer visibility updates only when crossing the 48-pixel scroll threshold.

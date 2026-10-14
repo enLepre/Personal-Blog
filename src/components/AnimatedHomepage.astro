@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import OptimizedImage from './OptimizedImage.astro';
 import { getEntry, render } from 'astro:content';
 const home = await getEntry('pages', 'home');
 if (!home) throw new Error('Missing pages/home.md');
@@ -16,7 +17,7 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
     <div class="home-stage">
       <div class="home-composition">
         <h1 class="home-title">{home.data.title}</h1>
-        <img class="home-landscape" src={`${base}${home.data.image}`} alt={home.data.imageAlt} width="1575" height="999" fetchpriority="high" />
+        <OptimizedImage class="home-landscape" src={home.data.image} alt={home.data.imageAlt} fetchpriority="high" loading="eager" />
         <ol class="home-sections" aria-label="Explore the website">
           {sections.map(({id, title, subtitle}) => <li class="home-section">
             <h2><a class="section-link" href={`${base}/${id}.html`}><span class="section-diamond" aria-hidden="true"></span><span>{title}</span></a></h2>
@@ -81,6 +82,9 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
     const clamp = (n: number) => Math.max(0, Math.min(1, n));
     const ease = (n: number) => n * n * (3 - 2 * n);
     let frame = 0;
+    let height = 0;
+    let rootTop = 0;
+    let needsMeasurement = true;
     if (innerHeight < 620) return;
     root.classList.add('is-animated');
     if (root.querySelector<HTMLElement>('.home-sections')!.offsetHeight > innerHeight * .7) {
@@ -89,11 +93,15 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
     }
     function update() {
       frame = 0;
-      const height = stage.clientHeight;
-      // The last reveal ends exactly at the page's maximum scroll position.
-      const finalProgress = 1.2 + (rows.length - 1) * .42 + .38;
-      root.style.height = `${(1 + finalProgress) * height}px`;
-      const progress = Math.max(0, -root.getBoundingClientRect().top) / height;
+      if (needsMeasurement) {
+        // Measure before writes, only at initialization or when the viewport changes.
+        height = stage.clientHeight;
+        rootTop = root.getBoundingClientRect().top + window.scrollY;
+        const finalProgress = 1.2 + (rows.length - 1) * .42 + .38;
+        root.style.height = `${(1 + finalProgress) * height}px`;
+        needsMeasurement = false;
+      }
+      const progress = Math.max(0, window.scrollY - rootTop) / height;
       const rise = clamp(progress / .8);
       image.style.transform = `translate(-50%, ${-rise * height * .65}px)`;
       image.style.opacity = String((.55 + .45 * rise) * (1 - ease(clamp((progress - .8) / .3))));
@@ -106,12 +114,13 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
         row.style.opacity = String(reveal);
         row.style.visibility = reveal > 0 ? 'visible' : 'hidden';
         row.style.transform = `translateY(${(1 - reveal) * 38}px)`;
-        row.inert = reveal < .95;
+        const inert = reveal < .95;
+        if (row.inert !== inert) row.inert = inert;
       });
     }
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     window.addEventListener('scroll', schedule, { passive: true, signal: controller.signal });
-    window.addEventListener('resize', schedule, { signal: controller.signal });
+    window.addEventListener('resize', () => { needsMeasurement = true; schedule(); }, { signal: controller.signal });
     update();
     cleanup = () => { controller.abort(); cancelAnimationFrame(frame); };
   }

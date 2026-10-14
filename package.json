@@ -10,7 +10,8 @@
     "sync:publications": "node scripts/sync-publications.mjs"
   },
   "dependencies": {
-    "astro": "^6.0.0"
+    "astro": "^6.0.0",
+    "sharp": "^0.35.5"
   },
   "packageManager": "pnpm@11.19.0"
 }
