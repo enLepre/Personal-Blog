@@ -197,8 +197,14 @@ html { scroll-behavior: auto; }
 .menu nav a { padding: 10px 0; font-size: 17px; }
 .menu nav .brand { font-size: 23px; padding-bottom: 20px; margin-bottom: 8px; border-bottom: 1px solid var(--hairline); }
 .menu nav a.is-active { font-style: italic; }
-.theme-control { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--hairline); font-size: 16px; }
-.theme-control select { min-height: 44px; max-width: 150px; padding: 6px 10px; border: 1px solid var(--control-border); border-radius: 0; background: var(--paper); color: var(--ink); font: inherit; cursor: pointer; }
+.theme-toggle { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; margin: 8px 0 0 -10px; padding: 10px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.theme-toggle svg { width: 22px; height: 22px; }
+.theme-sun { display: none; }
+:root[data-theme="dark"] .theme-sun { display: block; }
+:root[data-theme="dark"] .theme-moon { display: none; }
+/* Blend the illustration's paper into the page while preserving its line work. */
+.home-landscape, .landscape { mix-blend-mode: multiply; }
+:root[data-theme="dark"] :is(.home-landscape, .landscape) { filter: grayscale(1) invert(1); mix-blend-mode: screen; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
 .hero { min-height: calc(100svh - var(--site-header-height) - 58px); padding: 32px 0 48px; }
 .hero .landscape { width: min(560px, 100%); max-height: 48svh; object-fit: contain; margin-top: 44px; }

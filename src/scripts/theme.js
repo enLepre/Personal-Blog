@@ -15,17 +15,16 @@
     const theme = preference === 'system' ? (system.matches ? 'dark' : 'light') : preference;
     target.documentElement.dataset.theme = theme;
     target.documentElement.style.colorScheme = theme;
-    const select = target.querySelector('#theme-select');
-    if (select) select.value = preference;
+    const button = target.querySelector('#theme-toggle');
+    if (button) button.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
   }
   window.__blogTheme = apply;
   apply();
-  document.addEventListener('change', event => {
-    if (event.target.id !== 'theme-select') return;
-    preference = valid(event.target.value) ? event.target.value : 'system';
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#theme-toggle')) return;
+    preference = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     try {
-      if (preference === 'system') localStorage.removeItem(key);
-      else localStorage.setItem(key, preference);
+      localStorage.setItem(key, preference);
     } catch { /* Keep the selection for this visit even without storage. */ }
     apply();
   });

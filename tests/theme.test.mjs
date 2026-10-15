@@ -7,8 +7,8 @@ const source = readFileSync('src/scripts/theme.js', 'utf8');
 function setup({ stored = null, dark = false, blocked = false } = {}) {
   const events = {}, windowEvents = {}, values = new Map();
   if (stored !== null) values.set('personal-blog-theme', stored);
-  const makeDocument = () => ({ documentElement: { dataset: {}, style: {} }, select: {},
-    querySelector() { return this.select; }, addEventListener(name, fn) { (events[name] ||= []).push(fn); } });
+  const makeDocument = () => ({ documentElement: { dataset: {}, style: {} }, button: { attrs: {}, setAttribute(name, value) { this.attrs[name] = value; } },
+    querySelector() { return this.button; }, addEventListener(name, fn) { (events[name] ||= []).push(fn); } });
   const document = makeDocument();
   const system = { matches: dark, addEventListener(name, fn) { this.change = fn; } };
   const window = { matchMedia: () => system, addEventListener(name, fn) { windowEvents[name] = fn; } };
@@ -20,44 +20,45 @@ function setup({ stored = null, dark = false, blocked = false } = {}) {
   const context = vm.createContext({ window, document, localStorage });
   vm.runInContext(source, context);
   const fire = (name, event) => events[name].forEach(fn => fn(event));
-  const choose = value => fire('change', { target: { id: 'theme-select', value } });
-  return { document, system, windowEvents, values, choose, fire, makeDocument, context, events };
+  const toggle = () => fire('click', { target: { closest: selector => selector === '#theme-toggle' ? document.button : null } });
+  return { document, system, windowEvents, values, toggle, fire, makeDocument, context, events };
 }
 
 test('uses the system default, tracks it, and ignores invalid saved values', () => {
   for (const stored of [null, 'invalid']) {
     const s = setup({ stored, dark: true });
     assert.equal(s.document.documentElement.dataset.theme, 'dark');
-    assert.equal(s.document.select.value, 'system');
+    assert.equal(s.document.button.attrs['aria-label'], 'Switch to light mode');
     s.system.matches = false; s.system.change();
     assert.equal(s.document.documentElement.dataset.theme, 'light');
   }
 });
 
-test('persists explicit preferences and can return to the system default', () => {
+test('toggles and persists explicit preferences independently of system changes', () => {
   const s = setup({ stored: 'light', dark: true });
   assert.equal(s.document.documentElement.dataset.theme, 'light');
-  s.choose('dark');
+  s.toggle();
   assert.equal(s.values.get('personal-blog-theme'), 'dark');
   s.system.matches = false; s.system.change();
   assert.equal(s.document.documentElement.dataset.theme, 'dark');
-  s.choose('system');
-  assert.equal(s.values.has('personal-blog-theme'), false);
+  s.toggle();
+  assert.equal(s.values.get('personal-blog-theme'), 'light');
   assert.equal(s.document.documentElement.dataset.theme, 'light');
+  assert.equal(s.document.button.attrs['aria-label'], 'Switch to dark mode');
 });
 
 test('survives unavailable storage and updates Astro destinations before swapping', () => {
   const s = setup({ blocked: true });
-  s.choose('dark');
+  s.toggle();
   const next = s.makeDocument();
   s.fire('astro:before-swap', { newDocument: next });
   assert.equal(next.documentElement.dataset.theme, 'dark');
   assert.equal(next.documentElement.style.colorScheme, 'dark');
-  assert.equal(next.select.value, 'dark');
+  assert.equal(next.button.attrs['aria-label'], 'Switch to light mode');
   s.fire('astro:page-load');
   vm.runInContext(source, s.context);
-  assert.equal(s.events.change.length, 1);
-  assert.equal(s.document.select.value, 'dark');
+  assert.equal(s.events.click.length, 1);
+  assert.equal(s.document.button.attrs['aria-label'], 'Switch to light mode');
 });
 
 test('synchronizes another tab and storage clearing', () => {
@@ -67,5 +68,7 @@ test('synchronizes another tab and storage clearing', () => {
   s.windowEvents.storage({ key: 'other-key', newValue: 'light' });
   assert.equal(s.document.documentElement.dataset.theme, 'dark');
   s.windowEvents.storage({ key: null, newValue: null });
-  assert.equal(s.document.select.value, 'system');
+  assert.equal(s.document.documentElement.dataset.theme, 'light');
+  s.system.matches = true; s.system.change();
+  assert.equal(s.document.documentElement.dataset.theme, 'dark');
 });
