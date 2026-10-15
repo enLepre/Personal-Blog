@@ -4,14 +4,14 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 
 const source = readFileSync('src/scripts/theme.js', 'utf8');
-function setup({ stored = null, dark = false, blocked = false } = {}) {
+function setup({ stored = null, dark = false, blocked = false, reduced = false } = {}) {
   const events = {}, windowEvents = {}, values = new Map();
   if (stored !== null) values.set('personal-blog-theme', stored);
   const makeDocument = () => ({ documentElement: { dataset: {}, style: {} }, button: { attrs: {}, setAttribute(name, value) { this.attrs[name] = value; } },
     querySelector() { return this.button; }, addEventListener(name, fn) { (events[name] ||= []).push(fn); } });
   const document = makeDocument();
   const system = { matches: dark, addEventListener(name, fn) { this.change = fn; } };
-  const window = { matchMedia: () => system, addEventListener(name, fn) { windowEvents[name] = fn; } };
+  const window = { matchMedia: query => query.includes('reduced-motion') ? { matches: reduced } : system, addEventListener(name, fn) { windowEvents[name] = fn; } };
   const localStorage = {
     getItem(key) { if (blocked) throw Error('blocked'); return values.get(key) ?? null; },
     setItem(key, value) { if (blocked) throw Error('blocked'); values.set(key, value); },
@@ -71,4 +71,33 @@ test('synchronizes another tab and storage clearing', () => {
   assert.equal(s.document.documentElement.dataset.theme, 'light');
   s.system.matches = true; s.system.change();
   assert.equal(s.document.documentElement.dataset.theme, 'dark');
+});
+
+test('animates deliberate toggles, guards repeated clicks, and cleans up after interruption', async () => {
+  const s = setup();
+  let complete, updates = 0, skips = 0;
+  s.document.startViewTransition = update => {
+    updates++; update();
+    return { finished: new Promise(resolve => { complete = resolve; }), skipTransition() { skips++; complete(); } };
+  };
+  s.toggle();
+  assert.equal(updates, 1);
+  assert.equal(s.document.documentElement.dataset.theme, 'dark');
+  assert.equal(s.document.documentElement.dataset.themeTransition, '');
+  s.toggle();
+  assert.equal(updates, 1);
+  s.fire('astro:before-preparation');
+  await Promise.resolve();
+  assert.equal(skips, 1);
+  assert.equal(s.document.documentElement.dataset.themeTransition, undefined);
+  s.toggle(); complete(); await Promise.resolve();
+  assert.equal(updates, 2);
+});
+
+test('reduced motion changes the theme immediately without creating an animation', () => {
+  const s = setup({ reduced: true });
+  s.document.startViewTransition = () => { throw Error('Animation must be skipped'); };
+  s.toggle();
+  assert.equal(s.document.documentElement.dataset.theme, 'dark');
+  assert.equal(s.document.documentElement.dataset.themeTransition, undefined);
 });

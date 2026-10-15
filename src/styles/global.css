@@ -202,6 +202,16 @@ html { scroll-behavior: auto; }
 .theme-sun { display: none; }
 :root[data-theme="dark"] .theme-sun { display: block; }
 :root[data-theme="dark"] .theme-moon { display: none; }
+/* A short whole-page crossfade only when the theme button is activated. */
+:root[data-theme-transition] * { view-transition-name: none !important; }
+:root[data-theme-transition]::view-transition-old(root) { animation: theme-fade-out 360ms ease both; }
+:root[data-theme-transition]::view-transition-new(root) { animation: theme-fade-in 360ms ease both; }
+@keyframes theme-fade-out { to { opacity: 0; } }
+@keyframes theme-fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme-transition]::view-transition-old(root),
+  :root[data-theme-transition]::view-transition-new(root) { animation: none !important; }
+}
 /* Blend the illustration's paper into the page while preserving its line work. */
 .home-landscape, .landscape { mix-blend-mode: multiply; }
 :root[data-theme="dark"] :is(.home-landscape, .landscape) { filter: grayscale(1) invert(1); mix-blend-mode: screen; }

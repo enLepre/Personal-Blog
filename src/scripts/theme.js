@@ -20,14 +20,28 @@
   }
   window.__blogTheme = apply;
   apply();
+  let themeTransition;
   document.addEventListener('click', event => {
     if (!event.target.closest('#theme-toggle')) return;
+    if (themeTransition) return;
     preference = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     try {
       localStorage.setItem(key, preference);
     } catch { /* Keep the selection for this visit even without storage. */ }
-    apply();
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      apply();
+      return;
+    }
+    // Capture the whole page together, without Astro's directional page movement.
+    document.documentElement.dataset.themeTransition = '';
+    themeTransition = document.startViewTransition(() => apply());
+    const finish = () => {
+      delete document.documentElement.dataset.themeTransition;
+      themeTransition = undefined;
+    };
+    themeTransition.finished.then(finish, finish);
   });
+  document.addEventListener('astro:before-preparation', () => themeTransition?.skipTransition());
   system.addEventListener('change', () => { if (preference === 'system') apply(); });
   window.addEventListener('storage', event => {
     if (event.key !== key && event.key !== null) return;
