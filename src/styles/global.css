@@ -11,13 +11,13 @@
   --max:1120px;
 }
 :root[data-theme="dark"]{
-  --ink:#eeeeee;
-  --muted:#b0b0b0;
-  --hairline:#383838;
-  --paper:#161616;
-  --tagline:#bdbdbd;
-  --lead:#d0d0d0;
-  --control-border:#747474;
+  --ink:#e0e4e8;
+  --muted:#adb5bf;
+  --hairline:#414850;
+  --paper:#272c32;
+  --tagline:#b9c1ca;
+  --lead:#cdd4dc;
+  --control-border:#77828e;
   --link:#a8bfff;
   color-scheme:dark;
 }
