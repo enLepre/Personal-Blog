@@ -212,10 +212,8 @@ html { scroll-behavior: auto; }
   :root[data-theme-transition]::view-transition-old(root),
   :root[data-theme-transition]::view-transition-new(root) { animation: none !important; }
 }
-/* Blend the illustration's paper into the page while preserving its line work. */
-.home-landscape, .landscape { filter: grayscale(1) brightness(1.02); mix-blend-mode: multiply; }
-/* Clip the scan's near-white paper to white before inversion, so its edges blend exactly. */
-:root[data-theme="dark"] :is(.home-landscape, .landscape) { filter: grayscale(1) brightness(1.02) invert(1); mix-blend-mode: screen; }
+/* Render only the drawing's ink; the page itself supplies its background. */
+.home-landscape, .landscape { filter: url(#landscape-ink); }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
 .hero { min-height: calc(100svh - var(--site-header-height) - 58px); padding: 32px 0 48px; }
 .hero .landscape { width: min(560px, 100%); max-height: 48svh; object-fit: contain; margin-top: 44px; }
