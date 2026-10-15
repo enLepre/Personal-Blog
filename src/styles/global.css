@@ -1,12 +1,12 @@
 :root{
-  --ink:#111111;
-  --muted:#6f6f6f;
-  --hairline:#e7e7e7;
-  --paper:#ffffff;
-  --tagline:#525252;
-  --lead:#383838;
-  --control-border:#bfc1c7;
-  --link:#163ca5;
+  --ink:#34312c;
+  --muted:#70685e;
+  --hairline:#ded8ce;
+  --paper:#f5f2ec;
+  --tagline:#665e54;
+  --lead:#514b43;
+  --control-border:#b3aa9c;
+  --link:#294c80;
   color-scheme:light;
   --max:1120px;
 }
@@ -213,7 +213,7 @@ html { scroll-behavior: auto; }
   :root[data-theme-transition]::view-transition-new(root) { animation: none !important; }
 }
 /* Blend the illustration's paper into the page while preserving its line work. */
-.home-landscape, .landscape { mix-blend-mode: multiply; }
+.home-landscape, .landscape { filter: grayscale(1) brightness(1.02); mix-blend-mode: multiply; }
 /* Clip the scan's near-white paper to white before inversion, so its edges blend exactly. */
 :root[data-theme="dark"] :is(.home-landscape, .landscape) { filter: grayscale(1) brightness(1.02) invert(1); mix-blend-mode: screen; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
