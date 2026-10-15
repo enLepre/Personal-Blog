@@ -22,7 +22,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* Keep centered controls stationary when navigating between short and long pages. */
+html{scroll-behavior:smooth;scrollbar-gutter:stable}
 body{
   margin:0;
   min-height:100svh;
