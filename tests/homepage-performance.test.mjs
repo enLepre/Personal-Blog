@@ -4,14 +4,15 @@ import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 
-test('homepage scrolling reuses layout measurements and still reveals every link', () => {
+for (const nativeScroll of [false, true]) test(`homepage ${nativeScroll ? 'native' : 'fallback'} scrolling reuses measurements and keeps links accessible`, () => {
   const source = readFileSync('src/components/AnimatedHomepage.astro', 'utf8').split('<script>')[1].split('</script>')[0];
   let measurements = 0, heightWrites = 0, pending;
-  const element = () => ({ style: {}, inert: false });
+  let styleWrites = 0;
+  const element = () => ({ style: new Proxy({}, { set(target, key, value) { styleWrites++; target[key] = value; return true; } }), inert: false });
   const title = element(), image = element(), hint = element();
   const rows = Array.from({ length: 4 }, element);
   const stage = { get clientHeight() { measurements++; return 800; } };
-  const elements = { '.home-stage': stage, '.home-title': title, '.home-landscape': image, '.scroll-hint': hint, '.home-sections': { offsetHeight: 400 } };
+  const elements = { '.home-stage': stage, '.home-title': title, '.home-landscape-motion': image, '.scroll-hint': hint, '.home-sections': { offsetHeight: 400 } };
   const root = {
     classList: { add() {}, remove() {} },
     style: { set height(value) { heightWrites++; } },
@@ -24,7 +25,8 @@ test('homepage scrolling reuses layout measurements and still reveals every link
   const events = {};
   const document = { querySelector: () => root, addEventListener(name, handler) { events[name] = handler; } };
   vm.runInNewContext(stripTypeScriptTypes(source), {
-    document, window, innerHeight: 800, matchMedia: () => ({ matches: false }), AbortController,
+    document, window, innerHeight: 800, matchMedia: query => ({ matches: nativeScroll && query.includes('max-width') }), AbortController,
+    CSS: { supports: () => true },
     requestAnimationFrame(callback) { pending = callback; return 1; },
     cancelAnimationFrame() { pending = undefined; },
   });
@@ -35,9 +37,10 @@ test('homepage scrolling reuses layout measurements and still reveals every link
   scrollTo(2356);
   assert.equal(measurements, 2);
   assert.equal(heightWrites, 1);
-  assert.ok(rows.every(row => row.style.opacity === '1' && row.inert === false));
+  assert.ok(rows.every(row => (nativeScroll || row.style.opacity === '1') && row.inert === false));
   scrollTo(0);
-  assert.ok(rows.every(row => row.style.visibility === 'hidden' && row.inert === true));
+  assert.ok(rows.every(row => (nativeScroll || row.style.visibility === 'hidden') && row.inert === true));
+  if (nativeScroll) assert.equal(styleWrites, 0, 'Native scrolling must not write animation styles from JavaScript');
   listeners.resize.handler(); pending();
   assert.equal(measurements, 4);
   assert.equal(heightWrites, 2);

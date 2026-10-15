@@ -17,9 +17,9 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
     <div class="home-stage">
       <div class="home-composition">
         <h1 class="home-title">{home.data.title}</h1>
-        <OptimizedImage class="home-landscape" src={home.data.image} alt={home.data.imageAlt} fetchpriority="high" loading="eager" />
+        <OptimizedImage class="home-landscape home-landscape-motion" src={home.data.image} alt={home.data.imageAlt} fetchpriority="high" loading="eager" />
         <ol class="home-sections" aria-label="Explore the website">
-          {sections.map(({id, title, subtitle}) => <li class="home-section">
+          {sections.map(({id, title, subtitle}, index) => <li class="home-section" style={`--reveal-start:${(1.2 + index * .42) / 2.84 * 100}%;--reveal-end:${(1.58 + index * .42) / 2.84 * 100}%`}>
             <h2><a class="section-link" href={`${base}/${id}.html`}><span class="section-diamond" aria-hidden="true"></span><span>{title}</span></a></h2>
             {subtitle && <p>{subtitle}</p>}
           </li>)}
@@ -30,7 +30,9 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
     </div>
   </main>
 </Layout>
-<style>
+<!-- Keep timeline styles with this page: reusing a swapped head stylesheet can
+     break WebKit's history restoration. All selectors are homepage-specific. -->
+<style is:inline>
   .home-stage { width: min(calc(100% - 48px), 1120px); margin: auto; padding: 45px 0 80px; background: var(--paper); }
   .home-composition { width: min(860px, 100%); margin: auto; }
   .home-title { margin: 0; text-align: center; font-size: clamp(48px, 9vw, 104px); font-weight: 400; line-height: .95; letter-spacing: -.055em; }
@@ -48,16 +50,43 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
   .home-body { margin-top: 24px; }
   .scroll-hint { display: none; }
   .home-scroll.is-animated { height: 384svh; }
-  :global(body:has(.home-scroll.is-animated)) { padding-bottom: 0; }
+  body:has(.home-scroll.is-animated) { padding-bottom: 0; }
   .is-animated .home-stage { position: sticky; top: 0; height: 100svh; padding: 0; overflow: hidden; }
   .is-animated .home-composition { position: relative; height: 100%; }
   .is-animated .home-title { position: absolute; z-index: 3; top: 18%; width: 100%; transform-origin: center top; }
-  .is-animated .home-landscape { position: absolute; z-index: 1; top: 43%; left: 50%; margin: 0; transform: translateX(-50%); opacity: .55; }
+  .is-animated .home-landscape-motion { position: absolute; z-index: 1; top: 43%; left: 50%; margin: 0; transform: translateX(-50%); opacity: .55; }
   .is-animated .home-sections { position: absolute; z-index: 4; top: 24%; left: 50%; transform: translateX(-50%); margin: 0; }
   .is-animated .home-section { opacity: 0; visibility: hidden; transform: translateY(38px); }
   .is-animated .home-body { position: absolute; top: 88%; width: 100%; }
   .is-animated .scroll-hint { display: block; position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: .04em; }
   .scroll-hint span { margin-left: 12px; }
+  /* On supported phones, scroll progress and compositing stay in the browser. */
+  .is-native-scroll { view-timeline-name: --home-scroll; view-timeline-axis: block; }
+  .is-native-scroll .home-landscape-motion {
+    animation: home-image-rise 1s linear both, home-image-fade 1s linear both;
+    animation-timeline: --home-scroll, --home-scroll;
+    animation-range: contain 0% contain 28.169014%, contain 0% contain 38.732394%;
+  }
+  .is-native-scroll .home-title {
+    animation: home-title-settle 1s cubic-bezier(.333333,0,.666667,1) both;
+    animation-timeline: --home-scroll;
+    animation-range: contain 28.169014% contain 42.253521%;
+  }
+  .is-native-scroll .home-section {
+    animation: home-row-reveal 1s cubic-bezier(.333333,0,.666667,1) both;
+    animation-timeline: --home-scroll;
+    animation-range: contain var(--reveal-start) contain var(--reveal-end);
+  }
+  .is-native-scroll .scroll-hint {
+    animation: home-hint-fade 1s linear both;
+    animation-timeline: --home-scroll;
+    animation-range: contain 0% contain 8.802817%;
+  }
+  @keyframes home-image-rise { from { transform: translateX(-50%); } to { transform: translate(-50%, -65svh); } }
+  @keyframes home-image-fade { from { opacity: .55; } 72.727273% { opacity: 1; animation-timing-function: cubic-bezier(.333333,0,.666667,1); } to { opacity: 0; } }
+  @keyframes home-title-settle { from { transform: translateY(0) scale(1); } to { transform: translateY(-14svh) scale(.52); } }
+  @keyframes home-row-reveal { from { opacity: 0; visibility: hidden; transform: translateY(38px); } to { opacity: 1; visibility: visible; transform: translateY(0); } }
+  @keyframes home-hint-fade { from { opacity: 1; } to { opacity: 0; } }
   @media (max-width: 600px) {
     .home-stage { width: calc(100% - 36px); }
     .home-title { font-size: clamp(44px, 11vw, 66px); }
@@ -75,7 +104,7 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
     if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const stage = root.querySelector<HTMLElement>('.home-stage')!;
     const title = root.querySelector<HTMLElement>('.home-title')!;
-    const image = root.querySelector<HTMLElement>('.home-landscape')!;
+    const image = root.querySelector<HTMLElement>('.home-landscape-motion')!;
     const hint = root.querySelector<HTMLElement>('.scroll-hint')!;
     const rows = [...root.querySelectorAll<HTMLElement>('.home-section')];
     const controller = new AbortController();
@@ -91,6 +120,10 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
       root.classList.remove('is-animated');
       return;
     }
+    const nativeScroll = matchMedia('(max-width: 600px) and (pointer: coarse)').matches
+      && typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()')
+      && CSS.supports('animation-range: contain 0% contain 100%');
+    if (nativeScroll) root.classList.add('is-native-scroll');
     function update() {
       frame = 0;
       if (needsMeasurement) {
@@ -102,27 +135,44 @@ const sections = await Promise.all(['research', 'publications', 'notes', 'about'
         needsMeasurement = false;
       }
       const progress = Math.max(0, window.scrollY - rootTop) / height;
-      const rise = clamp(progress / .8);
-      image.style.transform = `translate(-50%, ${-rise * height * .65}px)`;
-      image.style.opacity = String((.55 + .45 * rise) * (1 - ease(clamp((progress - .8) / .3))));
-      image.style.visibility = progress >= 1.1 ? 'hidden' : 'visible';
-      const settle = ease(clamp((progress - .8) / .4));
-      title.style.transform = `translateY(${-settle * height * .14}px) scale(${1 - settle * .48})`;
-      hint.style.opacity = String(1 - clamp(progress * 4));
+      if (!nativeScroll) {
+        const rise = clamp(progress / .8);
+        image.style.transform = `translate(-50%, ${-rise * height * .65}px)`;
+        image.style.opacity = String((.55 + .45 * rise) * (1 - ease(clamp((progress - .8) / .3))));
+        image.style.visibility = progress >= 1.1 ? 'hidden' : 'visible';
+        const settle = ease(clamp((progress - .8) / .4));
+        title.style.transform = `translateY(${-settle * height * .14}px) scale(${1 - settle * .48})`;
+        hint.style.opacity = String(1 - clamp(progress * 4));
+      }
       rows.forEach((row, i) => {
         const reveal = ease(clamp((progress - 1.2 - i * .42) / .38));
-        row.style.opacity = String(reveal);
-        row.style.visibility = reveal > 0 ? 'visible' : 'hidden';
-        row.style.transform = `translateY(${(1 - reveal) * 38}px)`;
+        if (!nativeScroll) {
+          row.style.opacity = String(reveal);
+          row.style.visibility = reveal > 0 ? 'visible' : 'hidden';
+          row.style.transform = `translateY(${(1 - reveal) * 38}px)`;
+        }
         const inert = reveal < .95;
         if (row.inert !== inert) row.inert = inert;
       });
     }
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     window.addEventListener('scroll', schedule, { passive: true, signal: controller.signal });
-    window.addEventListener('resize', () => { needsMeasurement = true; schedule(); }, { signal: controller.signal });
+    let resizeObserver: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== 'undefined') {
+      let observedWidth: number | undefined;
+      resizeObserver = new ResizeObserver(([entry]) => {
+        const changed = entry.contentRect.height !== height
+          || (observedWidth !== undefined && entry.contentRect.width !== observedWidth);
+        observedWidth = entry.contentRect.width;
+        if (changed) { needsMeasurement = true; schedule(); }
+      });
+      // Browser bars can resize a phone's viewport without changing this 100svh stage.
+      resizeObserver.observe(stage);
+    } else {
+      window.addEventListener('resize', () => { needsMeasurement = true; schedule(); }, { signal: controller.signal });
+    }
     update();
-    cleanup = () => { controller.abort(); cancelAnimationFrame(frame); };
+    cleanup = () => { controller.abort(); resizeObserver?.disconnect(); cancelAnimationFrame(frame); };
   }
   document.addEventListener('astro:before-swap', () => cleanup());
   document.addEventListener('astro:page-load', initializeHomepage);
