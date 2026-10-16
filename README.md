@@ -26,7 +26,7 @@ Each page also supports `reading: true` or `reading: false`. All current level 3
 
 Use standard YAML `level: 3` (one colon), not `level:: 3`.
 
-Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research and Notes are automatically sorted newest first. Equal dates use the optional `order` number (smaller first), then the filename as a stable tie-breaker. Articles without `order` come after numbered articles on the same date. Dates are metadata and are not displayed, preserving the original design.
+Each dated entry has `title` and `date` (YYYY-MM-DD) in its YAML frontmatter, followed by its Markdown body. Research and Notes are automatically sorted newest first. Equal dates use the optional `order` number (smaller first), then the filename as a stable tie-breaker. Articles without `order` come after numbered articles on the same date. Individual Notes end with a right-aligned signature: `Enrico` above the publication date, formatted as `February 16th, 2024`. The date comes from the note's frontmatter and is formatted in UTC so it stays consistent across time zones. Research pages and section lists do not display dates.
 
 Use a `preview` field in the frontmatter to control the short description shown on the homepage and section lists:
 
