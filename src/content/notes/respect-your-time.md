@@ -14,6 +14,7 @@ Writing has never been my strongest skill. I really got into it only during my P
 
 Length matters. When I scroll through an essay and the scrollbar is the size of my thumb I get discouraged. I opened that page intending to learn about the hydrogen economy. Why am I reading about the Roman Empire? Ok, let me open (ex-)twitter and scroll through the endless list of slop. At least I can quickly give up on something when it does not match my interests. A complex argument needs space, but how can I commit to it if it does not assure me a return on my investment? These are often my thoughts when I try to commit to a long text, and I understand completely why (ex-)twitter wins over a book. I do look for information, but 
 
-> *I  prefer a long list of ideas in competition rather than a long list of reasons why one single idea is correct* 
+> *I  prefer a long list of ideas in competition*
+> *rather than a long list of reasons why one is correct* 
 
 I want my writing to follow this philosophy. My guess is that a four-paragraph structure is a middle ground between short- and long-form writing. I'll try to construct my notes with an introduction (or hook), two body paragraphs, and a conclusion. Nothing more. Nothing less. This is the style I want to embrace in my notes as much as in my scientific endeavours. It is not easy, but it is my best way to respect our time. 
