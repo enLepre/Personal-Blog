@@ -3,6 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import Publications from '../../components/Publications.astro';
 import { articleHref } from '../../lib/urls.mjs';
+import { formatNoteDate } from '../../lib/dates.mjs';
 export async function getStaticPaths() {
   const sections = ['research', 'notes'] as const;
   const routes = await Promise.all(sections.map(async section =>
@@ -28,6 +29,25 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <h1 class="page-title">{entry.data.title}</h1>
       <div class="prose"><Content /></div>
       {entry.data.publications && <Publications />}
+      {section === 'notes' && (
+        <footer class="note-signature">
+          <span>Enrico</span>
+          <time datetime={entry.data.date.toISOString().slice(0, 10)}>{formatNoteDate(entry.data.date)}</time>
+        </footer>
+      )}
     </article>
   </main>
 </Layout>
+
+<style>
+  .note-signature {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-top: 2.5rem;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.75;
+    text-align: right;
+  }
+</style>
