@@ -5,6 +5,7 @@ reading: true
 order: 2
 date: 2026-10-11
 preview: "Someone finding time to listens to it"
+status: Thoughts
 ---
 
 I love music. I like listening to my Kid A vinyl as much as I love cranking up Taylor Swift on Spotify. There is hardly any genre I dislike, given the right context. Sometimes, the right context is just time passing by, music ageing, and perspectives changing.What I’ve always found fascinating about people who love music is their strong feelings about songs, artists, or genres—and I expected to share those feelings. A rap fan would shit on trap music using the same words that a rock fanatic would have used about rap music a few years earlier. I have always asked myself: why? What drives those strong feelings? What makes a good song good?
