@@ -16,4 +16,6 @@ Research means investigating unknown avenues where unexpected consequences will 
 
 Using judgments about other people's mistakes as a weapon to establish a hierarchy goes against the point of this process. It makes researchers less willing to take risks and increases their fear of designing new experiments. I think this is a battle we need to fight together, to allow everyone, from bachelor's students to professors, room for imperfection. That space can provide everyone with important new information that would otherwise be lost.
 
-So, next time you see an obvious mistake, don't judge. Think about the background, ask if help is needed, and be ready to offer support when the mistake is uncovered. The aim is to grow together because, in the end, if you are not making mistakes, you are not working on hard enough problems.
+So, next time you see an obvious mistake, don't judge. Think about the background, ask if help is needed, and be ready to offer support when the mistake is uncovered. The aim is to grow together because, in the end, 
+
+> *if you are not making mistakes, you are not working on hard enough problems*
