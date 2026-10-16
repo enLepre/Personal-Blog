@@ -5,6 +5,7 @@ reading: true
 order: 1
 date: 2026-10-11
 preview: "If you are not making mistakes, you are not working on hard enough problems"
+status: "thoughts"
 ---
 
 It is very difficult to judge the quality of work in scientific research. While there are certain red flags you can consider, their significance may change when you take the researcher's background into account. For a physicist with little training in solution preparation, preparing a solution might be a big challenge, whereas for a chemist trained in the technique it might not be. A chemist watching that physicist prepare a solution might be quick to conclude that the work is of poor quality, but that judgment would overlook differences in training.
