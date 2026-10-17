@@ -20,7 +20,7 @@ In my free time, I like to play music, hike, and think about abstract concepts.
 
 2024–present — University of Zurich (Postdoc, Physical Chemistry)
 
-2023 — hte GmbH (Postdoc, Sustainable Chemical Processes)
+2023–2024 — hte GmbH (Postdoc, Sustainable Chemical Processes)
 
 2019–2023 — Max Planck Institute of Colloids and Interfaces (PhD, Materials Science)
 
