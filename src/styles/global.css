@@ -272,6 +272,13 @@ body.is-page-scrolled .site-footer {
 
 /* Match the blank-line spacing between the About page paragraphs. */
 .about-content .item h2 { margin-bottom: 21.25px; }
+.about-content .curriculum-entry {
+  display: grid;
+  grid-template-columns: 13ch minmax(0, 1fr);
+  column-gap: clamp(12px, 3vw, 28px);
+}
+.curriculum-year { white-space: nowrap; }
+.curriculum-description { min-width: 0; }
 
 .section-heading.has-portrait { display: grid; grid-template-columns: minmax(0, 1fr) 200px; align-items: end; gap: 40px; margin-bottom: 66px; }
 .section-heading.has-portrait .page-title { margin-bottom: 0; }
