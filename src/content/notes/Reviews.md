@@ -16,4 +16,6 @@ In my experience, frontier large language models have made terrific progress. Ov
 
 > *The value of a review increasingly lies in its authors’ judgment—and their willingness to take responsibility for its claims.*
 
-Indeed, while I find them useful for searching and synthesizing the literature, LLMs cannot take responsibility if mistakes are made. However, we are still human and if mistakes are made, we need to find a cause. “Hallucinations” are not a good enough excuse and we need the human in the loop. My bet for the future job market is the same: knowledge workers will increasingly focus on quality assurance rather than knowledge production.
+Indeed, while I find them useful for searching and synthesizing the literature, LLMs cannot take responsibility if mistakes are made. However, when mistakes are made, we still need someone to blame. “The model hallucinated” is not a satisfying answer: we want someone we can hold accountable.
+
+Knowledge workers will increasingly spend their time evaluating and interpreting AI-generated work. However, I bet their value will not decrease, but shift to taking responsibility for the result rather than generating it.
