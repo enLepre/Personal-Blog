@@ -18,13 +18,13 @@ In my free time, I like to play music, hike, and think about abstract concepts.
 
 ## Curriculum
 
-2024–present — University of Zurich (Postdoc in Physical Chemistry)
+2024–present — University of Zurich (Postdoc, Physical Chemistry)
 
-2023 — hte GmbH (Postdoc in Sustainable Chemical Processes)
+2023 — hte GmbH (Postdoc, Sustainable Chemical Processes)
 
-2019–2023 — Max Planck Institute of Colloids and Interfaces (PhD in Materials Science)
+2019–2023 — Max Planck Institute of Colloids and Interfaces (PhD, Materials Science)
 
-2014–2019 — Università degli Studi di Trieste (Bachelor's and Master's degrees in Chemistry)
+2014–2019 — Università degli Studi di Trieste (Bachelor's and Master's degrees, Chemistry)
 
 ## Contacts
 
