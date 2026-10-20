@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getEntry } from 'astro:content';
 import SectionContent from '../components/SectionContent.astro';
 import OptimizedImage from '../components/OptimizedImage.astro';
+import { previewText } from '../lib/social-preview.mjs';
 export function getStaticPaths() {
   return ['research', 'publications', 'notes', 'about'].map(section => ({ params: { section } }));
 }
@@ -10,7 +11,7 @@ const { section } = Astro.params;
 const entry = await getEntry('sections', section!);
 if (!entry) throw new Error(`Missing section Markdown: ${section}`);
 ---
-<Layout section={section} title={entry.data.title} level={entry.data.level} reading={entry.data.reading}>
+<Layout section={section} title={entry.data.title} subtitle={previewText(entry.data).subtitle} level={entry.data.level} reading={entry.data.reading}>
   <main class="page">
     <div class:list={{ 'section-heading': true, 'has-portrait': Boolean(entry.data.portrait) }}>
       <div>

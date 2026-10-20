@@ -4,6 +4,7 @@ import themeScript from '../scripts/theme.js?raw';
 import LandscapeFilter from '../components/LandscapeFilter.astro';
 import { getEntry, getCollection } from 'astro:content';
 import { ClientRouter } from 'astro:transitions';
+import { previewMetadata } from '../lib/social-preview.mjs';
 const movement = {
   old: { name: 'page-up-out', duration: '650ms', easing: 'cubic-bezier(.65,0,.25,1)', fillMode: 'both' },
   new: { name: 'page-up-in', duration: '650ms', easing: 'cubic-bezier(.65,0,.25,1)', fillMode: 'both' }
@@ -13,13 +14,17 @@ const reverseMovement = {
   new: { ...movement.new, name: 'page-down-in' }
 };
 const pageTransition = { forwards: movement, backwards: reverseMovement };
-const { section = 'home', title, level, reading = false } = Astro.props;
+const { section = 'home', title, subtitle, level, reading = false } = Astro.props;
 const homeEntry = await getEntry('pages', 'home');
 if (!homeEntry) throw new Error('Missing pages/home.md');
 const sections = await getCollection('sections');
 const sectionTitle = (id: string) => sections.find(entry => entry.id === id)?.data.title || id;
 const home = section === 'home';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const social = previewMetadata(
+  home ? homeEntry.data : { title: title || sectionTitle(section), subtitle },
+  Astro.url.pathname, Astro.site!, base,
+);
 const menuItems = ['research', 'publications', 'notes', 'about'].map(id => ({
   id,
   label: sectionTitle(id),
@@ -39,7 +44,23 @@ const menuItems = ['research', 'publications', 'notes', 'about'].map(id => ({
   <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} sizes="any" />
   <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} sizes="180x180" />
   <title>{home ? homeEntry.data.title : `${title || sectionTitle(section)} — ${homeEntry.data.title}`}</title>
-  <meta name="description" content="Research and notes by Enrico Lepre." />
+  <meta name="description" content={social.subtitle || 'Research and notes by Enrico Lepre.'} />
+  <link rel="canonical" href={social.url} />
+  <meta property="og:type" content={level === 3 ? 'article' : 'website'} />
+  <meta property="og:site_name" content={homeEntry.data.menuTitle} />
+  <meta property="og:title" content={social.title} />
+  {social.subtitle && <meta property="og:description" content={social.subtitle} />}
+  <meta property="og:url" content={social.url} />
+  <meta property="og:image" content={social.image} />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={social.alt} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={social.title} />
+  {social.subtitle && <meta name="twitter:description" content={social.subtitle} />}
+  <meta name="twitter:image" content={social.image} />
+  <meta name="twitter:image:alt" content={social.alt} />
 </head>
 <body id="top" data-page={section} data-page-level={level} data-reading={String(reading)}>
   <LandscapeFilter />
