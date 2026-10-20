@@ -58,6 +58,14 @@ The Pages workflow refreshes on every push to `main`, on a manual run, and each 
 
 If ORCID fails or sends incomplete data, the saved list is preserved and the blog can still deploy using that cache. A first sync without any cached works must succeed. Ordinary `pnpm run build` is offline and uses the saved list. Changing the ORCID also requires replacing its cache to avoid showing another person's works.
 
+## Link previews
+
+Every build generates a minimal 1200 × 630 PNG for the homepage, sections, notes, and research articles. The images contain only the exact title and subtitle on the site's warm paper background. PNG text uses bundled Libre Baskerville, a portable serif alternative to Georgia; the website's typography is unchanged. Generation runs locally during the build and does not call an image service.
+
+For notes and research, the existing `preview` text supplies the subtitle. Sections use `lead`, then `preview` if the lead is empty. An optional `subtitle` frontmatter field overrides these defaults on any page, including Home; `subtitle: ""` deliberately produces a title-only image. No subtitle is invented when all these fields are absent. Long text wraps and reduces in size rather than being shortened.
+
+The shared layout adds Open Graph and Twitter/X metadata with absolute image and canonical URLs, including the GitHub Pages base path. Updating the wording changes the generated image URL. Sharing platforms control their surrounding card layout, cropping, and caching, so an existing shared link may take time to refresh.
+
 ## Publish
 
 Every push to `main` runs `.github/workflows/pages.yml`: install from the lockfile, test, build Astro, upload only `dist`, deploy to GitHub Pages. A manual workflow run is also supported. The existing branch-based Pages configuration is supported: the Astro deployment waits for any legacy build of the same commit to finish before publishing, preventing it from overwriting the built site. Switching Pages to **GitHub Actions** removes that redundant legacy build.

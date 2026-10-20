@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import Publications from '../../components/Publications.astro';
 import { articleHref } from '../../lib/urls.mjs';
 import { formatNoteDate } from '../../lib/dates.mjs';
+import { previewText } from '../../lib/social-preview.mjs';
 export async function getStaticPaths() {
   const sections = ['research', 'notes'] as const;
   const routes = await Promise.all(sections.map(async section =>
@@ -23,7 +24,7 @@ const parent = await getEntry('sections', section);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const [dateStart, dateSuffix, dateEnd] = formatNoteDate(entry.data.date).split(/(st|nd|rd|th)(?=,)/);
 ---
-<Layout section={section} title={entry.data.title} level={entry.data.level} reading={entry.data.reading}>
+<Layout section={section} title={entry.data.title} subtitle={previewText(entry.data).subtitle} level={entry.data.level} reading={entry.data.reading}>
   <main class="page article-page">
     <a class="back-link" href={`${base}/${section}.html`}>↑ {parent?.data.title || section}</a>
     <article>
