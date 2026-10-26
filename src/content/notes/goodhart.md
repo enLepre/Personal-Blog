@@ -1,5 +1,5 @@
 ---
-title: "A good Heart theory"
+title: "A good heart problem"
 level: 3
 reading: true
 order: 1
