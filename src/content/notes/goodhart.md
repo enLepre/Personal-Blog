@@ -8,7 +8,7 @@ preview: "How can we rely on manipulated metrics?"
 status: "thoughts"
 ---
 
-Organizations of people serve as a tool to focus individual efforts towards problems too large to be addressed by single persons. How to focus these efforts is not a trivial problem and part of those individuals specilizes on directing and manage other people tasks to direct them in the best direction to solve the problem. However, when problems are too large to be achieved in a reasonable amount of time, middle stage of evaluation are needed to understand whether the organization is working well or not. 
+Organizations of people serve as a tool to focus individual efforts towards problems too large to be addressed by single persons. How to focus these efforts is not a trivial problem and part of those individuals specilizes on directing other people tasks in the best direction to solve the problem. However, when problems are too large to be achieved in a reasonable amount of time, middle stage of evaluation are needed to understand whether the organization is working well or not. 
 
 > when a measure becomes a target, it ceases to be a good measure.
 
