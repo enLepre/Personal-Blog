@@ -3,7 +3,7 @@ title: "A good Heart theory"
 level: 3
 reading: true
 order: 1
-date: 2026-10-11
+date: 2026-10-26
 preview: "How can we rely on manipulated metrics?"
 status: "thoughts"
 ---
