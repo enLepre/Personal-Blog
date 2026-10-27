@@ -14,11 +14,11 @@ export async function renderSocialPreview({ title, subtitle = '', portrait }) {
     const svg = await satori({
       type: 'div',
       props: {
-        style: { display: 'flex', alignItems: 'center', width: 1200, height: 630, padding: 90,
+        style: { display: 'flex', alignItems: 'center', width: 1200, height: 630,
           backgroundColor: '#f5f2ec', color: '#34312c', fontFamily: 'Blog Serif' },
         children: [
           { type: 'img', props: { src: `data:image/png;base64,${photo.toString('base64')}`,
-            width: 360, height: 450, style: { flexShrink: 0 } } },
+            width: 360, height: 450, style: { flexShrink: 0, marginLeft: 90 } } },
           { type: 'div', props: {
             style: { display: 'flex', flexDirection: 'column', marginLeft: 64, width: 596 },
             children: [
