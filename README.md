@@ -1,6 +1,6 @@
 # Enrico Lepre — Personal Blog
 
-Static Astro website, published at https://enlepre.github.io/Personal-Blog/.
+Static Astro website, published at https://enlepre.github.io/.
 
 ## Homepage animation and restoration
 
@@ -73,7 +73,7 @@ Every push to `main` runs `.github/workflows/pages.yml`: install from the lockfi
 ## Individual article pages
 
 Every Markdown entry in Research and Notes generates its own URL:
-`/Personal-Blog/<collection>/<filename-without-md>.html`.
+`/<collection>/<filename-without-md>.html`.
 Click its title from the homepage or section page to read it separately.
 The section Markdown files have their existing `research.html`, `notes.html`,
 and `about.html` pages. The navigation links to them. The former Essays section
