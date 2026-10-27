@@ -22,7 +22,7 @@ const sectionTitle = (id: string) => sections.find(entry => entry.id === id)?.da
 const home = section === 'home';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const social = previewMetadata(
-  home ? homeEntry.data : section === 'about' && level === 2
+  home || (section === 'about' && level === 2)
     ? aboutPreview(sections.find(entry => entry.id === 'about')!.data)
     : { title: title || sectionTitle(section), subtitle },
   Astro.url.pathname, Astro.site!, base,
