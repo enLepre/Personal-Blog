@@ -10,7 +10,7 @@ export function previewText(data) {
 }
 
 export function aboutPreview(data) {
-  return { title: 'Enrico Lepre', subtitle: 'Personal Blog', portrait: data.portrait };
+  return { title: 'Enrico Lepre', subtitle: 'Chemistry, Fields, and Catalysis', portrait: data.portrait };
 }
 
 export function previewFilename(text) {

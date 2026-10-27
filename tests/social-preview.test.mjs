@@ -55,7 +55,7 @@ test('renderer produces 1200 × 630 PNGs for title-only, long and special-charac
 test('About sharing includes the page portrait and personal blog wording', async () => {
   const preview = aboutPreview({ title: 'About', portrait: '/assets/enrico-lepre.jpg' });
   assert.equal(preview.title, 'Enrico Lepre');
-  assert.equal(preview.subtitle, 'Personal Blog');
+  assert.equal(preview.subtitle, 'Chemistry, Fields, and Catalysis');
   const metadata = previewMetadata(preview, '/about.html', 'https://enlepre.github.io');
   assert.equal(metadata.image, `https://enlepre.github.io/social/${previewFilename(preview)}`);
   const image = await renderSocialPreview(preview);
