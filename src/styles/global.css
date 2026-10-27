@@ -137,6 +137,9 @@ nav a{display:block}
 .note-list li > div > a{
   font-size:21px;
 }
+.note-list li > div > a + .prose{
+  margin-top:10px;
+}
 .note-list span:last-child{
   color:var(--muted);
   font-size:14px;
