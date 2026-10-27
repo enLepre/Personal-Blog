@@ -4,8 +4,8 @@ level: 3
 reading: true
 order: 1
 date: 2026-10-26
-preview: "and the challenge of making a measure not a target"
-status: "growing"
+preview: "and the challenge of making a measure not the target"
+status: "thoughts"
 ---
 Organizations allow individuals to combine their efforts to address problems too large to be solved alone. However, coordinating these efforts is not trivial. Among the challenges, evaluating whether a problem is actually being solved is perhaps the most difficult. When problems require long periods to be addressed, evaluations tend to focus on individual stages rather than the bigger picture. Consequently, individuals begin optimizing their performance within these smaller stages, sometimes at the expense of the overall objective.
 
