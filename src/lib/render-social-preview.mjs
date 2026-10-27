@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import satori from 'satori';
@@ -8,7 +9,7 @@ const font = readFile(require.resolve('@fontsource/libre-baskerville/files/libre
 
 export async function renderSocialPreview({ title, subtitle = '', portrait }) {
   if (portrait) {
-    const photo = await sharp(await readFile(new URL(`../../public/${portrait.startsWith('/') ? portrait.slice(1) : portrait}`, import.meta.url)))
+    const photo = await sharp(await readFile(resolve('public', portrait.startsWith('/') ? portrait.slice(1) : portrait)))
       .resize(360, 450, { fit: 'cover', position: 'attention' }).png().toBuffer();
     const svg = await satori({
       type: 'div',
