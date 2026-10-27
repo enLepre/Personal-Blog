@@ -1,10 +1,13 @@
 import { defineConfig } from 'astro/config';
 import { aboutSections } from './src/lib/about-sections.mjs';
 import { externalLinks } from './src/lib/external-links.mjs';
-export default defineConfig({ site: 'https://enlepre.github.io', base: '/Personal-Blog', output: 'static', redirects: {
-  '/essays': '/Personal-Blog/notes.html',
-  '/essays/good-song': '/Personal-Blog/notes/good-song.html',
-  '/essays/mistakes': '/Personal-Blog/notes/mistakes.html',
-  '/research/publications': '/Personal-Blog/publications.html',
-  '/research/02-publications': '/Personal-Blog/publications.html',
+// GitHub Actions supplies the repository name, so both project and root sites work.
+const repository = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? 'enlepre.github.io';
+const base = repository.toLowerCase() === 'enlepre.github.io' ? '' : `/${repository}`;
+export default defineConfig({ site: 'https://enlepre.github.io', base: base || '/', output: 'static', redirects: {
+  '/essays': `${base}/notes.html`,
+  '/essays/good-song': `${base}/notes/good-song.html`,
+  '/essays/mistakes': `${base}/notes/mistakes.html`,
+  '/research/publications': `${base}/publications.html`,
+  '/research/02-publications': `${base}/publications.html`,
 }, markdown: { rehypePlugins: [aboutSections, [externalLinks, { site: 'https://enlepre.github.io' }]] }, build: { format: 'file' } });
