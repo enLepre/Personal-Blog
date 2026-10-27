@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { previewFilename, previewText } from '../../lib/social-preview.mjs';
+import { previewFilename, previewText, aboutPreview } from '../../lib/social-preview.mjs';
 import { renderSocialPreview } from '../../lib/render-social-preview.mjs';
 
 export async function getStaticPaths() {
@@ -9,7 +9,8 @@ export async function getStaticPaths() {
     getCollection('notes'), getCollection('research'),
   ]);
   const images = new Map(collections.flat().map(entry => {
-    const text = previewText(entry.data);
+    const text = entry.collection === 'sections' && entry.id === 'about'
+      ? aboutPreview(entry.data) : previewText(entry.data);
     return [previewFilename(text).replace(/\.png$/, ''), text];
   }));
   return [...images].map(([image, text]) => ({ params: { image }, props: { text } }));

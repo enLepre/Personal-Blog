@@ -5,7 +5,12 @@ export function previewText(data) {
   return {
     title: data.title,
     subtitle: data.subtitle ?? (data.lead || data.preview || ''),
+    ...(data.portrait ? { portrait: data.portrait } : {}),
   };
+}
+
+export function aboutPreview(data) {
+  return { title: 'Enrico Lepre', subtitle: 'Personal Blog', portrait: data.portrait };
 }
 
 export function previewFilename(text) {

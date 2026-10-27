@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import { previewText, previewFilename, previewMetadata } from '../src/lib/social-preview.mjs';
+import { previewText, previewFilename, previewMetadata, aboutPreview } from '../src/lib/social-preview.mjs';
 import { renderSocialPreview } from '../src/lib/render-social-preview.mjs';
 
 test('sharing uses the exact note title and existing preview, including punctuation', () => {
@@ -50,4 +50,18 @@ test('renderer produces 1200 × 630 PNGs for title-only, long and special-charac
     assert.ok(Math.abs((left + right) / 2 - 600) < 24, 'text is horizontally centered');
     assert.ok(Math.abs((top + bottom) / 2 - 315) < 24, 'text is vertically centered');
   }
+});
+
+test('About sharing includes the page portrait and personal blog wording', async () => {
+  const preview = aboutPreview({ title: 'About', portrait: '/assets/enrico-lepre.jpg' });
+  assert.equal(preview.title, 'Enrico Lepre');
+  assert.equal(preview.subtitle, 'Personal Blog');
+  const metadata = previewMetadata(preview, '/about.html', 'https://enlepre.github.io');
+  assert.equal(metadata.image, `https://enlepre.github.io/social/${previewFilename(preview)}`);
+  const image = await renderSocialPreview(preview);
+  const info = await sharp(image).metadata();
+  assert.equal(info.width, 1200);
+  assert.equal(info.height, 630);
+  const stats = await sharp(image).extract({ left: 90, top: 90, width: 360, height: 450 }).stats();
+  assert.ok(stats.channels.some(channel => channel.stdev > 20), 'left panel contains the portrait');
 });

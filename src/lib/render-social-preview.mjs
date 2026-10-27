@@ -6,7 +6,31 @@ import sharp from 'sharp';
 const require = createRequire(import.meta.url);
 const font = readFile(require.resolve('@fontsource/libre-baskerville/files/libre-baskerville-latin-400-normal.woff'));
 
-export async function renderSocialPreview({ title, subtitle = '' }) {
+export async function renderSocialPreview({ title, subtitle = '', portrait }) {
+  if (portrait) {
+    const photo = await sharp(await readFile(new URL(`../../public/${portrait.startsWith('/') ? portrait.slice(1) : portrait}`, import.meta.url)))
+      .resize(360, 450, { fit: 'cover', position: 'attention' }).png().toBuffer();
+    const svg = await satori({
+      type: 'div',
+      props: {
+        style: { display: 'flex', alignItems: 'center', width: 1200, height: 630, padding: 90,
+          backgroundColor: '#f5f2ec', color: '#34312c', fontFamily: 'Blog Serif' },
+        children: [
+          { type: 'img', props: { src: `data:image/png;base64,${photo.toString('base64')}`,
+            width: 360, height: 450, style: { flexShrink: 0 } } },
+          { type: 'div', props: {
+            style: { display: 'flex', flexDirection: 'column', marginLeft: 64, width: 596 },
+            children: [
+              { type: 'div', props: { style: { fontSize: 62, lineHeight: 1.2, letterSpacing: '-0.04em' }, children: title } },
+              { type: 'div', props: { style: { fontSize: 32, lineHeight: 1.46, color: '#665e54', marginTop: 26 }, children: subtitle } },
+            ],
+          } },
+        ],
+      },
+    }, { width: 1200, height: 630,
+      fonts: [{ name: 'Blog Serif', data: await font, weight: 400, style: 'normal' }] });
+    return sharp(Buffer.from(svg)).png().toBuffer();
+  }
   // Reduce font size until the complete text fits; never shorten supplied text.
   for (let scale = 1; scale >= 0.2; scale -= 0.05) {
     let fits = true;
