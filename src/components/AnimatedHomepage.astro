@@ -1,180 +1,96 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import OptimizedImage from './OptimizedImage.astro';
-import { getEntry, render } from 'astro:content';
+import { getEntry } from 'astro:content';
 const home = await getEntry('pages', 'home');
 if (!home) throw new Error('Missing pages/home.md');
-const { Content } = await render(home);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const sections = await Promise.all(['research', 'publications', 'notes', 'about'].map(async id => {
   const entry = await getEntry('sections', id);
   if (!entry) throw new Error(`Missing section: ${id}`);
-  return { id, title: entry.data.title, subtitle: entry.data.lead || entry.data.preview };
+  return {id, title:entry.data.title, description:entry.data.lead || entry.data.preview};
 }));
+const stops = home.data.career;
 ---
 <Layout level={home.data.level} reading={home.data.reading}>
   <main class="home-scroll" data-home-scroll>
     <div class="home-stage">
-      <div class="home-composition">
-        <h1 class="home-title">{home.data.title}</h1>
-        <OptimizedImage class="home-landscape home-landscape-motion" src={home.data.image} alt={home.data.imageAlt} fetchpriority="high" loading="eager" />
-        <ol class="home-sections" aria-label="Explore the website">
-          {sections.map(({id, title, subtitle}, index) => <li class="home-section" style={`--reveal-start:${(1.2 + index * .42) / 2.84 * 100}%;--reveal-end:${(1.58 + index * .42) / 2.84 * 100}%`}>
-            <h2><a class="section-link" href={`${base}/${id}.html`}><span class="section-diamond" aria-hidden="true"></span><span>{title}</span></a></h2>
-            {subtitle && <p>{subtitle}</p>}
-          </li>)}
+      <h1 class="home-title">{home.data.title}</h1>
+      <OptimizedImage class="home-landscape home-landscape-motion" src={home.data.image} alt={home.data.imageAlt} fetchpriority="high" loading="eager" />
+      <div class="home-journey" data-stops={JSON.stringify(stops)}>
+        <svg class="journey-map" aria-hidden="true"></svg>
+        <ol class="career-accessible">
+          {stops.map(stop => <li>{stop.city}: {stop.title}, {stop.topic}</li>)}
         </ol>
-        <div class="home-body prose"><Content /></div>
+        <nav class="journey-menu" aria-label="Explore the website">
+          {sections.map(({id,title},index) => <a class="journey-link" href={`${base}/${id}.html`} data-section-index={index} aria-describedby={`journey-description-${id}`}>
+            <span class="journey-label">{title}</span>
+            <span class="journey-hover-marker" aria-hidden="true"></span>
+          </a>)}
+        </nav>
+        <div class="journey-descriptions">
+          {sections.map(({id,description}) => <p class="journey-description" id={`journey-description-${id}`}>{description}</p>)}
+        </div>
       </div>
       <span class="scroll-hint" aria-hidden="true">Scroll to explore <span>↓</span></span>
     </div>
   </main>
 </Layout>
-<!-- Keep timeline styles with this page: reusing a swapped head stylesheet can
-     break WebKit's history restoration. All selectors are homepage-specific. -->
+<!-- Page-local styles survive Astro history restoration. Title typography is
+     unchanged from the original online homepage and inherits the site font. -->
 <style is:inline>
-  .home-stage { width: min(calc(100% - 48px), 1120px); margin: auto; padding: 45px 0 80px; background: var(--paper); }
-  .home-composition { width: min(860px, 100%); margin: auto; }
-  .home-title { margin: 0; text-align: center; font-size: clamp(48px, 9vw, 104px); font-weight: 400; line-height: .95; letter-spacing: -.055em; }
-  .home-landscape { display: block; width: min(560px, 100%); height: auto; max-height: 48svh; object-fit: contain; margin: 44px auto 0; }
-  .home-sections { list-style: none; padding: 0; width: min(700px, 100%); margin: 64px auto 0; }
-  .home-section { padding: 18px 0; border-bottom: 1px solid var(--hairline); }
-  .home-section h2 { margin: 0 0 8px; font-size: clamp(23px, 3vw, 29px); font-weight: 400; letter-spacing: -.02em; }
-  .home-section p { margin: 0 0 0 44px; color: var(--muted); font-size: 17px; line-height: 1.5; }
-  .section-link { position: relative; display: inline-flex; align-items: center; min-height: 44px; gap: 26px; padding-right: 16px; }
-  .section-diamond { position: relative; flex: 0 0 18px; width: 18px; height: 18px; }
-  .section-diamond::before { content: ''; position: absolute; width: 14px; height: 14px; top: 2px; left: 2px; border: 1px solid var(--ink); transform: rotate(45deg); transition: transform .25s ease; }
-  .section-link::after { content: ''; position: absolute; inset: 0 -8px 0 -12px; border: 1px solid var(--ink); transform: scaleX(.08); transform-origin: left; opacity: 0; transition: transform .4s cubic-bezier(.22,.61,.36,1), opacity .2s ease; pointer-events: none; }
-  .section-link:hover .section-diamond::before, .section-link:focus-visible .section-diamond::before { transform: rotate(0); }
-  .section-link:hover::after, .section-link:focus-visible::after { transform: scaleX(1); opacity: 1; }
-  .home-body { margin-top: 24px; }
-  .scroll-hint { display: none; }
-  .home-scroll.is-animated { height: 384svh; }
-  body:has(.home-scroll.is-animated) { padding-bottom: 0; }
-  .is-animated .home-stage { position: sticky; top: 0; height: 100svh; padding: 0; overflow: hidden; }
-  .is-animated .home-composition { position: relative; height: 100%; }
-  .is-animated .home-title { position: absolute; z-index: 3; top: 18%; width: 100%; transform-origin: center top; }
-  .is-animated .home-landscape-motion { position: absolute; z-index: 1; top: 43%; left: 50%; margin: 0; transform: translateX(-50%); opacity: .55; }
-  .is-animated .home-sections { position: absolute; z-index: 4; top: 24%; left: 50%; transform: translateX(-50%); margin: 0; }
-  .is-animated .home-section { opacity: 0; visibility: hidden; transform: translateY(38px); }
-  .is-animated .home-body { position: absolute; top: 88%; width: 100%; }
-  .is-animated .scroll-hint { display: block; position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: .04em; }
-  .scroll-hint span { margin-left: 12px; }
-  /* On supported phones, scroll progress and compositing stay in the browser. */
-  .is-native-scroll { view-timeline-name: --home-scroll; view-timeline-axis: block; }
-  .is-native-scroll .home-landscape-motion {
-    animation: home-image-rise 1s linear both, home-image-fade 1s linear both;
-    animation-timeline: --home-scroll, --home-scroll;
-    animation-range: contain 0% contain 28.169014%, contain 0% contain 38.732394%;
+  .home-stage { width:min(calc(100% - 48px),1120px); margin:auto; padding:45px 0 80px; background:var(--paper); }
+  .home-title { max-width:860px; margin:0 auto; text-align:center; font-size:clamp(48px,9vw,104px); font-weight:400; line-height:.95; letter-spacing:-.055em; }
+  .home-landscape { display:block; width:min(560px,100%); height:auto; max-height:48svh; object-fit:contain; margin:44px auto 0; }
+  .home-journey { position:relative; margin:64px auto 0; }
+  .journey-map { display:none; width:100%; height:560px; overflow:hidden; }
+  .career-accessible { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); }
+  .journey-menu { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; width:100%; }
+  .journey-link { position:relative; display:flex; align-items:flex-start; justify-content:center; min-height:100px; padding:16px 4px 40px; font-size:clamp(22px,3vw,32px); line-height:1.2; letter-spacing:-.02em; color:var(--muted); }
+  .journey-label { transition:color .2s ease; }
+  .journey-hover-marker { position:absolute; left:50%; top:76px; width:8px; height:8px; border:1.5px solid var(--ink); background:var(--ink); transform:translate(-50%,-50%) rotate(45deg); transition:width .3s ease,height .3s ease,transform .3s ease,background-color .15s ease; pointer-events:none; }
+  .journey-link.is-selected .journey-hover-marker { width:26px; height:26px; background:var(--paper); }
+  .journey-link.is-selected { color:var(--ink); }
+  .journey-descriptions { position:relative; width:min(800px,calc(100% - 64px)); min-height:160px; margin:30px auto 0; }
+  .journey-description { position:absolute; inset:0 0 auto; margin:0; color:var(--ink); font-size:19px; line-height:1.55; text-align:justify; text-align-last:left; hyphens:auto; overflow-wrap:break-word; opacity:0; visibility:hidden; transform:translateY(8px); }
+  .scroll-hint { display:none; }
+  .home-scroll.is-animated { height:calc(220svh + 6000px); margin-top:calc(-1 * var(--site-header-height)); }
+  body:has(.home-scroll.is-animated) { padding-bottom:0; }
+  .is-animated .home-stage { position:sticky; top:0; height:100svh; padding:0; overflow:hidden; }
+  .is-animated .home-title { position:absolute; z-index:3; top:18%; left:50%; width:min(860px,100%); transform:translateX(-50%); transform-origin:center top; }
+  .is-animated .home-landscape-motion { position:absolute; top:43%; left:50%; margin:0; transform:translateX(-50%); opacity:.55; }
+  .is-animated .home-journey { position:absolute; top:110px; left:0; right:0; max-width:1024px; margin:0 auto; opacity:0; }
+  .is-animated .journey-map { display:block; }
+  .is-animated .journey-menu { position:absolute; inset:199px 0 auto; }
+  .is-animated .journey-link { opacity:0; visibility:hidden; }
+  .is-animated .journey-hover-marker { opacity:0; }
+  .is-animated .journey-descriptions { position:absolute; top:319px; left:50%; transform:translateX(-50%); margin:0; }
+  .is-animated .scroll-hint { display:block; position:absolute; bottom:38px; left:50%; transform:translateX(-50%); color:var(--muted); font-size:13px; letter-spacing:.04em; }
+  .scroll-hint span { margin-left:12px; }
+  .journey-land { fill:none; stroke:var(--muted); stroke-opacity:.35; stroke-width:.8; stroke-linejoin:round; }
+  .journey-route { fill:none; stroke:var(--ink); stroke-width:1.7; stroke-linecap:round; }
+  .journey-pin { fill:var(--ink); }
+  .journey-ring { fill:var(--paper); stroke:var(--ink); stroke-width:1.5; }
+  .journey-career text { paint-order:stroke; stroke:var(--paper); stroke-width:6; stroke-linejoin:round; }
+  .journey-city { fill:var(--muted); font-size:14px; font-style:italic; }
+  .journey-role { fill:var(--ink); font-size:21px; letter-spacing:-.02em; }
+  .journey-topic { fill:var(--muted); font-size:14px; }
+  .journey-leader { fill:none; stroke:var(--muted); stroke-opacity:.5; stroke-width:.65; }
+  @media(max-width:700px) {
+    .home-stage { width:calc(100% - 36px); }
+    .home-title { font-size:clamp(44px,11vw,66px); }
+    .home-journey { margin-top:44px; }
+    .journey-menu { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 0; }
+    .journey-link { font-size:25px; }
+    .journey-descriptions { width:100%; min-height:190px; }
   }
-  .is-native-scroll .home-title {
-    animation: home-title-settle 1s cubic-bezier(.333333,0,.666667,1) both;
-    animation-timeline: --home-scroll;
-    animation-range: contain 28.169014% contain 42.253521%;
-  }
-  .is-native-scroll .home-section {
-    animation: home-row-reveal 1s cubic-bezier(.333333,0,.666667,1) both;
-    animation-timeline: --home-scroll;
-    animation-range: contain var(--reveal-start) contain var(--reveal-end);
-  }
-  .is-native-scroll .scroll-hint {
-    animation: home-hint-fade 1s linear both;
-    animation-timeline: --home-scroll;
-    animation-range: contain 0% contain 8.802817%;
-  }
-  @keyframes home-image-rise { from { transform: translateX(-50%); } to { transform: translate(-50%, -65svh); } }
-  @keyframes home-image-fade { from { opacity: .55; } 72.727273% { opacity: 1; animation-timing-function: cubic-bezier(.333333,0,.666667,1); } to { opacity: 0; } }
-  @keyframes home-title-settle { from { transform: translateY(0) scale(1); } to { transform: translateY(-14svh) scale(.52); } }
-  @keyframes home-row-reveal { from { opacity: 0; visibility: hidden; transform: translateY(38px); } to { opacity: 1; visibility: visible; transform: translateY(0); } }
-  @keyframes home-hint-fade { from { opacity: 1; } to { opacity: 0; } }
-  @media (max-width: 600px) {
-    .home-stage { width: calc(100% - 36px); }
-    .home-title { font-size: clamp(44px, 11vw, 66px); }
-    .home-section { padding: 12px 0; }
-    .home-section p { font-size: 15px; line-height: 1.4; }
-    .is-animated .home-sections { top: 23%; }
-  }
-  @media (prefers-reduced-motion: reduce) { .section-diamond::before, .section-link::after { transition: none; } }
+  @media(prefers-reduced-motion:reduce) { .journey-hover-marker,.journey-label { transition:none; } }
 </style>
 <script>
+  import { initializeHomepage } from '../scripts/homepage-journey.js';
   let cleanup = () => {};
-  function initializeHomepage() {
-    cleanup();
-    const root = document.querySelector<HTMLElement>('[data-home-scroll]');
-    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const stage = root.querySelector<HTMLElement>('.home-stage')!;
-    const title = root.querySelector<HTMLElement>('.home-title')!;
-    const image = root.querySelector<HTMLElement>('.home-landscape-motion')!;
-    const hint = root.querySelector<HTMLElement>('.scroll-hint')!;
-    const rows = [...root.querySelectorAll<HTMLElement>('.home-section')];
-    const controller = new AbortController();
-    const clamp = (n: number) => Math.max(0, Math.min(1, n));
-    const ease = (n: number) => n * n * (3 - 2 * n);
-    let frame = 0;
-    let height = 0;
-    let rootTop = 0;
-    let needsMeasurement = true;
-    if (innerHeight < 620) return;
-    root.classList.add('is-animated');
-    if (root.querySelector<HTMLElement>('.home-sections')!.offsetHeight > innerHeight * .7) {
-      root.classList.remove('is-animated');
-      return;
-    }
-    const nativeScroll = matchMedia('(max-width: 600px) and (pointer: coarse)').matches
-      && typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()')
-      && CSS.supports('animation-range: contain 0% contain 100%');
-    if (nativeScroll) root.classList.add('is-native-scroll');
-    function update() {
-      frame = 0;
-      if (needsMeasurement) {
-        // Measure before writes, only at initialization or when the viewport changes.
-        height = stage.clientHeight;
-        rootTop = root.getBoundingClientRect().top + window.scrollY;
-        const finalProgress = 1.2 + (rows.length - 1) * .42 + .38;
-        root.style.height = `${(1 + finalProgress) * height}px`;
-        needsMeasurement = false;
-      }
-      const progress = Math.max(0, window.scrollY - rootTop) / height;
-      if (!nativeScroll) {
-        const rise = clamp(progress / .8);
-        image.style.transform = `translate(-50%, ${-rise * height * .65}px)`;
-        image.style.opacity = String((.55 + .45 * rise) * (1 - ease(clamp((progress - .8) / .3))));
-        image.style.visibility = progress >= 1.1 ? 'hidden' : 'visible';
-        const settle = ease(clamp((progress - .8) / .4));
-        title.style.transform = `translateY(${-settle * height * .14}px) scale(${1 - settle * .48})`;
-        hint.style.opacity = String(1 - clamp(progress * 4));
-      }
-      rows.forEach((row, i) => {
-        const reveal = ease(clamp((progress - 1.2 - i * .42) / .38));
-        if (!nativeScroll) {
-          row.style.opacity = String(reveal);
-          row.style.visibility = reveal > 0 ? 'visible' : 'hidden';
-          row.style.transform = `translateY(${(1 - reveal) * 38}px)`;
-        }
-        const inert = reveal < .95;
-        if (row.inert !== inert) row.inert = inert;
-      });
-    }
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
-    window.addEventListener('scroll', schedule, { passive: true, signal: controller.signal });
-    let resizeObserver: ResizeObserver | undefined;
-    if (typeof ResizeObserver !== 'undefined') {
-      let observedWidth: number | undefined;
-      resizeObserver = new ResizeObserver(([entry]) => {
-        const changed = entry.contentRect.height !== height
-          || (observedWidth !== undefined && entry.contentRect.width !== observedWidth);
-        observedWidth = entry.contentRect.width;
-        if (changed) { needsMeasurement = true; schedule(); }
-      });
-      // Browser bars can resize a phone's viewport without changing this 100svh stage.
-      resizeObserver.observe(stage);
-    } else {
-      window.addEventListener('resize', () => { needsMeasurement = true; schedule(); }, { signal: controller.signal });
-    }
-    update();
-    cleanup = () => { controller.abort(); resizeObserver?.disconnect(); cancelAnimationFrame(frame); };
-  }
+  const initialize = () => { cleanup(); cleanup = initializeHomepage(); };
   document.addEventListener('astro:before-swap', () => cleanup());
-  document.addEventListener('astro:page-load', initializeHomepage);
-  initializeHomepage();
+  document.addEventListener('astro:page-load', initialize);
+  initialize();
 </script>

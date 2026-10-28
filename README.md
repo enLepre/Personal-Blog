@@ -66,6 +66,26 @@ For notes and research, the existing `preview` text supplies the subtitle. Secti
 
 The shared layout adds Open Graph and Twitter/X metadata with absolute image and canonical URLs, including the GitHub Pages base path. Updating the wording changes the generated image URL. Sharing platforms control their surrounding card layout, cropping, and caching, so an existing shared link may take time to refresh.
 
+## Homepage journey
+
+The animated homepage draws the Europe map from north to south, reveals the
+career route, erases the map, and continuously opens the curved route into the
+four section links. The title keeps the website's existing Georgia typography.
+After the scroll tour, all titles remain visible but no description or enlarged
+marker remains selected. Hover or keyboard focus expands that section's diamond
+clockwise into an empty square and shows its description; leaving clears it again.
+
+Edit the four `career` entries in `src/content/pages/home.md` to change the cities,
+coordinates, qualifications and topics. Navigation titles and descriptions come
+from `src/content/sections/{research,publications,notes,about}.md`: `title` and
+`lead` (or `preview` when `lead` is empty). Descriptions use a centered, justified
+800px reading column. They are not duplicated in the animation code.
+
+Narrow or short viewports and reduced-motion settings use a static, accessible
+menu with the same links and hover/focus descriptions. The original homepage
+remains available through `homepageAnimation: false`. The map data is local and
+requires no new runtime dependency or external map service.
+
 ## Publish
 
 Every push to `main` runs `.github/workflows/pages.yml`: install from the lockfile, test, build Astro, upload only `dist`, deploy to GitHub Pages. A manual workflow run is also supported. The existing branch-based Pages configuration is supported: the Astro deployment waits for any legacy build of the same commit to finish before publishing, preventing it from overwriting the built site. Switching Pages to **GitHub Actions** removes that redundant legacy build.
