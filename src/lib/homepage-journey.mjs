@@ -10,12 +10,20 @@ export function viewportLayout(width,height,textHeight) {
   const available=Math.max(160,height-top-24);
   const lineY=Math.max(90,Math.min(compact?260:275,available-textHeight-48));
   const vertical=compact,lineX=24,lineStart=28;
-  const stepGap=Math.max(44,Math.min(76,(available-textHeight-lineStart-48)/3));
+  const stepGap=Math.max(160,textHeight+80);
   const lineEnd=lineStart+3*stepGap;
-  const descriptionTop=vertical?lineEnd+40:lineY+40;
-  return {compact,vertical,top,lineY,lineX,lineStart,lineEnd,stepGap,descriptionTop,mapHeight:compact?Math.min(500,available):560,
+  const descriptionTop=vertical?lineStart+40:lineY+40;
+  const contentHeight=lineEnd+40+textHeight+24;
+  return {compact,vertical,top,lineY,lineX,lineStart,lineEnd,stepGap,descriptionTop,contentHeight,maxPan:Math.max(0,contentHeight-available),mapHeight:compact?Math.min(500,available):560,
     descriptionHeight:Math.max(60,available-descriptionTop),
     distance:compact?Math.round(Math.max(2600,Math.min(4500,height*6))):6000};
+}
+export function timelinePan(time,viewport) {
+  if(!viewport.vertical||time<11.6)return 0;
+  const elapsed=time-11.6,index=Math.min(3,Math.floor(elapsed/1.65));
+  const travel=index===3?0:smooth((elapsed-index*1.65-1.25)/.4);
+  const tail=index===3?smooth((time-17.8)/1.2)*Math.max(0,viewport.maxPan-3*viewport.stepGap):0;
+  return Math.min(viewport.maxPan,(index+travel)*viewport.stepGap+tail);
 }
 export function projection(width, height, {compact=false}={}) {
   const broad = Math.min((width-48)/(55*Math.PI/180), (height-56)/(mercatorY(72)-mercatorY(32)));

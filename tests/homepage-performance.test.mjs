@@ -52,16 +52,16 @@ test('scroll reuses geometry measurements, reveals navigation, and ends empty',(
   f.scrollTo(6800);assert.equal(f.title.style.transform,finalTransform,'title remains settled');
   f.cleanup();assert.equal(f.window.listeners.scroll.signal.aborted,true);
 });
-for(const options of [{},{reduced:true},{mobile:true},{reduced:true,mobile:true}])test(`hover and keyboard reveal one description and clear it on exit ${JSON.stringify(options)}`,()=>{
+for(const options of [{},{reduced:true},{mobile:true},{reduced:true,mobile:true}])test(`hover and keyboard preserve the layout's description behavior ${JSON.stringify(options)}`,()=>{
   const f=fixture(options);f.scrollTo(6960);
   f.event(0,'pointerenter');assert.equal(f.descriptions[0].style.opacity,'1');
   assert.ok(f.links[0].classes.has('is-selected'));
   assert.match(f.links[0].marker.style.transform,/rotate\(90deg\)/);
-  f.event(0,'pointerleave');assert.ok(f.descriptions.every(p=>p.style.opacity==='0'));
+  f.event(0,'pointerleave');assert.ok(f.descriptions.every(p=>p.style.opacity===(options.mobile?'1':'0')));
   assert.match(f.links[0].marker.style.transform,/rotate\(135deg\)/,'exit continues clockwise');
   f.event(2,'focus');assert.equal(f.descriptions[2].style.opacity,'1');
-  assert.ok(f.descriptions.filter(p=>p.style.opacity!=='0').length===1);
-  f.event(2,'blur');assert.ok(f.descriptions.every(p=>p.style.opacity==='0'));
+  assert.equal(f.descriptions.filter(p=>p.style.opacity!=='0').length,options.mobile?4:1);
+  f.event(2,'blur');assert.ok(f.descriptions.every(p=>p.style.opacity===(options.mobile?'1':'0')));
   assert.equal(f.root.classes.has('is-animated'),!options.reduced);
   f.cleanup();
 });
@@ -83,12 +83,15 @@ for(const [screenWidth,stageHeight] of [[320,568],[375,667],[390,844],[430,932],
   assert.ok(Math.abs(researchPosition[0]-24)<.001);
   assert.ok(Math.abs(researchPosition[1]-28)<.001,'first menu node starts at the top');
   f.scrollTo(stageHeight*1.2+distance*13.85/19);
+  assert.equal(f.descriptions[0].style.opacity,'1','Research remains readable after Publications appears');
+  assert.equal(f.descriptions[1].style.opacity,'1');
+  assert.ok(parseFloat(f.descriptions[1].style.top)>=f.descriptions[0].offsetHeight+80,'text has dedicated room below each title');
   const publicationsPosition=center();
   assert.ok(Math.abs(publicationsPosition[0]-researchPosition[0])<.001);
   assert.ok(publicationsPosition[1]>researchPosition[1],'selection moves down the vertical rail');
   f.scrollTo(stageHeight*1.2+distance);
   assert.ok(f.links.every(link=>!link.inert&&parseFloat(link.style.fontSize)>=24));
-  assert.ok(f.descriptions.every(p=>p.style.opacity==='0'));
+  assert.ok(f.descriptions.every(p=>p.style.opacity==='1'),'mobile descriptions remain visible at the end');
   const heightBefore=f.root.style.height,transformBefore=f.title.style.transform;
   f.window.innerHeight+=60;f.window.listeners.resize.handler();f.flush();
   assert.equal(f.root.style.height,heightBefore,'browser chrome must not change scroll distance');

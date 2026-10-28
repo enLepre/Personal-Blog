@@ -1,5 +1,5 @@
 import boundaries from '../data/europe-boundaries.json';
-import { DURATION, clamp, smooth, diamond, projection, clipPolyline, routeMotion, focusState, titleOpacity, curvePath, viewportLayout } from '../lib/homepage-journey.mjs';
+import { DURATION, clamp, smooth, diamond, projection, clipPolyline, routeMotion, focusState, titleOpacity, curvePath, viewportLayout, timelinePan } from '../lib/homepage-journey.mjs';
 
 export function initializeHomepage() {
   const root=document.querySelector('[data-home-scroll]');
@@ -24,7 +24,7 @@ export function initializeHomepage() {
 
   function drawMap() {
     const {compact,mapHeight}=viewport;
-    svg.replaceChildren();attr(svg,{viewBox:`0 0 ${width} ${mapHeight}`});
+    svg.replaceChildren();attr(svg,{viewBox:`0 0 ${width} ${viewport.vertical?Math.max(mapHeight,viewport.contentHeight):mapHeight}`});
     const project=projection(width,mapHeight,viewport),defs=element('defs',svg);
     for(const axis of ['x','y']) {
       const gradient=element('linearGradient',defs,{id:`journey-edge-${axis}`,x2:axis==='x'?'100%':'0%',y2:axis==='y'?'100%':'0%'});
@@ -83,6 +83,7 @@ export function initializeHomepage() {
     root.style.setProperty('--journey-top',`${viewport.top}px`);
     root.style.setProperty('--journey-line-y',`${viewport.lineY}px`);
     root.style.setProperty('--journey-map-height',`${viewport.mapHeight}px`);
+    root.style.setProperty('--journey-svg-height',`${viewport.vertical?Math.max(viewport.mapHeight,viewport.contentHeight):viewport.mapHeight}px`);
     root.style.setProperty('--journey-description-height',`${viewport.descriptionHeight}px`);
     root.style.setProperty('--journey-line-x',`${viewport.lineX}px`);
     root.style.setProperty('--journey-line-start',`${viewport.lineStart}px`);
@@ -92,7 +93,8 @@ export function initializeHomepage() {
     else {svg.replaceChildren();title.style.transform='';image.style.transform='';image.style.opacity='';image.style.visibility='';host.style.opacity='';}
     const box=root.querySelector('.journey-descriptions');
     box.style.minHeight=animated?'0':`${Math.max(160,maxText)}px`;
-    box.style.height=animated?`${Math.min(maxText+8,viewport.descriptionHeight)}px`:'';
+    box.style.height=viewport.vertical?`${3*viewport.stepGap+maxText+8}px`:(animated?`${Math.min(maxText+8,viewport.descriptionHeight)}px`:'');
+    descriptions.forEach((p,i)=>{p.style.top=viewport.vertical?`${i*viewport.stepGap}px`:'';});
     needsMeasurement=false;
   }
 
@@ -118,6 +120,9 @@ export function initializeHomepage() {
     if(needsMeasurement)measure();
     const scroll=Math.max(0,window.scrollY-rootTop),progress=scroll/height;
     time=animated?DURATION*clamp((scroll-height*1.2)/viewport.distance):DURATION;
+    const pan=animated?timelinePan(time,viewport):0;
+    host.style.transform=pan?`translateY(${-pan}px)`:'';
+    host.style.clipPath=pan?`inset(${pan}px 0 0 0)`:'';
     let points;
     if(animated){
       const rise=clamp(progress/.8),settle=smooth((progress-.8)/.4);
@@ -165,7 +170,7 @@ export function initializeHomepage() {
     if(textIndex!==desiredIndex){textOpacity=Math.max(0,textOpacity-speed);if(textOpacity===0)textIndex=desiredIndex;}
     else textOpacity+=Math.sign(desiredOpacity-textOpacity)*Math.min(Math.abs(desiredOpacity-textOpacity),speed);
     descriptions.forEach((p,i)=>{
-      const opacity=i===textIndex?textOpacity:0;
+      const opacity=viewport.vertical?(animated?titleOpacity(time,i):1):(i===textIndex?textOpacity:0);
       p.style.opacity=String(opacity);p.style.visibility=opacity>0?'visible':'hidden';
       p.style.transform=`translateY(${(1-opacity)*8}px)`;p.setAttribute('aria-hidden',String(opacity===0));
     });

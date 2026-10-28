@@ -1,8 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { projection, clipPolyline, routeMotion, focusState, titleOpacity, DURATION, viewportLayout } from '../src/lib/homepage-journey.mjs';
+import { projection, clipPolyline, routeMotion, focusState, titleOpacity, DURATION, viewportLayout, timelinePan } from '../src/lib/homepage-journey.mjs';
 
 const cities=[[13.7768,45.6495],[13.0645,52.3906],[8.6724,49.3988],[8.5417,47.3769]];
+test('long mobile rail reserves text space and scrolls to the last paragraph',()=>{
+  for(const textHeight of [90,150,600]){
+    const v=viewportLayout(284,568,textHeight);
+    assert.ok(v.stepGap>=textHeight+80);
+    assert.equal(timelinePan(11.6,v),0);
+    assert.ok(Math.abs(timelinePan(19,v)-v.maxPan)<.001);
+    assert.ok(v.top+v.contentHeight-timelinePan(19,v)<=568-24+.001);
+  }
+});
 test('drawing excludes invisible coastlines and preserves distinct boundary fragments',()=>{
   assert.deepEqual(clipPolyline([[-10,50],[50,50],[110,50]],100,100),[[[0,50],[50,50],[100,50]]]);
   assert.deepEqual(clipPolyline([[-10,-20],[-10,120]],100,100),[]);
