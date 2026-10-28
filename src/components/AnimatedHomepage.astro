@@ -17,6 +17,7 @@ const stops = home.data.career;
     <div class="home-stage">
       <h1 class="home-title">{home.data.title}</h1>
       <OptimizedImage class="home-landscape home-landscape-motion" src={home.data.image} alt={home.data.imageAlt} fetchpriority="high" loading="eager" />
+      <div class="journey-window">
       <div class="home-journey" data-stops={JSON.stringify(stops)}>
         <svg class="journey-map" aria-hidden="true"></svg>
         <ol class="career-accessible">
@@ -31,6 +32,7 @@ const stops = home.data.career;
         <div class="journey-descriptions">
           {sections.map(({id,description}) => <p class="journey-description" id={`journey-description-${id}`}>{description}</p>)}
         </div>
+      </div>
       </div>
       <span class="scroll-hint" aria-hidden="true">Scroll to explore <span>↓</span></span>
     </div>
@@ -61,6 +63,10 @@ const stops = home.data.career;
   .is-animated .home-landscape-motion { position:absolute; top:43%; left:50%; margin:0; transform:translateX(-50%); opacity:.55; }
   .is-animated .home-landscape-motion, .is-animated .home-title { will-change:transform,opacity; }
   .is-animated .home-journey { position:absolute; top:var(--journey-top,110px); left:0; right:0; max-width:1024px; margin:0 auto; opacity:0; }
+  /* Clip in a stationary viewport so panning never animates a large clip-path. */
+  .is-animated .journey-window { position:absolute; top:var(--journey-top,110px); bottom:0; left:0; right:0; overflow:hidden; contain:paint; }
+  .is-animated .journey-window .home-journey { top:0; }
+  .is-animated.is-vertical .home-journey { will-change:transform; }
   .is-animated .journey-map { display:block; }
   .is-animated .journey-menu { position:absolute; inset:calc(var(--journey-line-y,275px) - 76px) 0 auto; }
   .is-animated .journey-link { opacity:0; visibility:hidden; }

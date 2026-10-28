@@ -6,9 +6,9 @@ import * as geometry from '../src/lib/homepage-journey.mjs';
 
 function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHeight=800}={}) {
   let measurements=0,now=100,pending;
-  const work={attributes:0,curves:0,lengthReads:0,builds:0};
+  const work={attributes:0,styles:0,curves:0,lengthReads:0,builds:0};
   class Element {
-    constructor(){this.style={setProperty(k,v){this[k]=v;}};this.attributes={};this.children=[];this.listeners={};this.inert=false;this.dataset={};this.offsetHeight=90;this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
+    constructor(){this.style=new Proxy({setProperty(k,v){this[k]=v;}},{set(target,key,value){work.styles++;target[key]=value;return true;}});this.attributes={};this.children=[];this.listeners={};this.inert=false;this.dataset={};this.offsetHeight=90;this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
     setAttribute(k,v){work.attributes++;this.attributes[k]=v;}
     append(node){this.children.push(node);}
     replaceChildren(){work.builds++;this.children=[];}
@@ -48,14 +48,20 @@ for(const mobile of [false,true])test(`map work is bounded to its visible animat
   const seek=time=>f.scrollTo(960+distance*time/19);
   seek(1);
   assert.equal(f.work.builds,1);
+  const flatten=node=>[node,...node.children.flatMap(flatten)];
+  const masks=flatten(f.svg).filter(node=>node.attributes.mask);
+  assert.equal(masks.length,mobile?0:2,'phone map avoids nested rendering masks');
   assert.equal(f.work.lengthReads,0,'polyline length requires no SVG layout reads');
   assert.equal(f.work.curves,0,'initial straight connections need no curve sampling');
   seek(8);
   assert.equal(f.work.curves,3,'morph computes one curve per connection');
   seek(19);
-  const curves=f.work.curves,attributes=f.work.attributes;
+  assert.equal(f.host.style.clipPath,undefined,'panning does not repaint an animated clip-path');
+  if(mobile)assert.match(f.host.style.transform,/translate3d/);
+  const curves=f.work.curves,attributes=f.work.attributes,styles=f.work.styles;
   seek(19);
   assert.equal(f.work.attributes,attributes,'unchanged frame performs no SVG/ARIA attribute writes');
+  assert.equal(f.work.styles,styles,'unchanged frame performs no style writes');
   f.event(0,'pointerenter');f.event(0,'pointerleave');
   assert.equal(f.work.curves,curves,'hover never recomputes settled route geometry');
   seek(8);

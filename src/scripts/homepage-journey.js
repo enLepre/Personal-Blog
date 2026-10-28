@@ -19,6 +19,8 @@ export function initializeHomepage() {
   let strokes=[],inkLength=0,paths=[],pins=[],labels=[],positions=[],ring;
   let textIndex=-1,textOpacity=0,manualIndex=-1;
   const turns=[45,45,45,45],exitUntil=[0,0,0,0];
+  const styles=new WeakMap();
+  const style=(node,name,value)=>{let previous=styles.get(node);if(!previous){previous={};styles.set(node,previous);}if(previous[name]!==value){node.style[name]=value;previous[name]=value;}};
   const attributes=new WeakMap();
   const attr=(node,values)=>{ let previous=attributes.get(node);if(!previous){previous={};attributes.set(node,previous);}for(const [name,value] of Object.entries(values)){const next=String(value);if(previous[name]!==next){node.setAttribute(name,next);previous[name]=next;}} return node; };
   let lastInk='',lastGeometry=-1,lastPaint=-1,cachedPoints=[],mapReady=false,landGroup,textGroup;
@@ -31,10 +33,11 @@ export function initializeHomepage() {
     const project=projection(width,mapHeight,viewport),defs=element('defs',svg);
     for(const axis of ['x','y']) {
       const gradient=element('linearGradient',defs,{id:`journey-edge-${axis}`,x2:axis==='x'?'100%':'0%',y2:axis==='y'?'100%':'0%'});
-      for(const [offset,opacity] of [['0%',0],['7%',1],['93%',1],['100%',0]])element('stop',gradient,{offset,'stop-color':'white','stop-opacity':opacity});
+      for(const [offset,opacity] of [['0%',0],['7%',1],['93%',1],['100%',0]])element('stop',gradient,{offset,'stop-color':compact?'var(--paper)':'white','stop-opacity':compact?1-opacity:opacity});
       const mask=element('mask',defs,{id:`journey-mask-${axis}`});element('rect',mask,{width,height:mapHeight,fill:`url(#journey-edge-${axis})`});
     }
-    const land=element('g',element('g',svg,{mask:'url(#journey-mask-x)'}),{mask:'url(#journey-mask-y)'});
+    // On phones, paper-coloured edge overlays avoid two offscreen mask surfaces.
+    const land=compact?element('g',svg):element('g',element('g',svg,{mask:'url(#journey-mask-x)'}),{mask:'url(#journey-mask-y)'});
     landGroup=land;
     strokes=boundaries.flatMap(line=>clipPolyline(line.map(project),width,mapHeight)).map(line=>{
       let points=line;
@@ -47,6 +50,7 @@ export function initializeHomepage() {
       return {node,length,first:points[0]};
     }).filter(s=>s.length>.1).sort((a,b)=>a.first[1]-b.first[1]||a.first[0]-b.first[0]);
     inkLength=0;strokes.forEach(s=>{s.start=inkLength;inkLength+=s.length;attr(s.node,{'stroke-dasharray':`${s.length} ${s.length}`});});
+    if(compact)for(const axis of ['x','y'])element('rect',land,{width,height:mapHeight,fill:`url(#journey-edge-${axis})`,'pointer-events':'none'});
     const route=element('g',svg),nodes=element('g',svg),text=element('g',svg);
     textGroup=text;
     paths=Array.from({length:3},()=>element('path',route,{class:'journey-route',pathLength:1,'stroke-dasharray':'1 1'}));
@@ -98,11 +102,11 @@ export function initializeHomepage() {
     root.style.setProperty('--journey-step-gap',`${viewport.stepGap}px`);
     root.style.setProperty('--journey-description-top',`${viewport.descriptionTop}px`);
     mapReady=false;
-    if(!animated){svg.replaceChildren();title.style.transform='';image.style.transform='';image.style.opacity='';image.style.visibility='';host.style.opacity='';}
+    if(!animated){svg.replaceChildren();style(title,'transform','');style(image,'transform','');style(image,'opacity','');style(image,'visibility','');style(host,'opacity','');}
     const box=root.querySelector('.journey-descriptions');
     box.style.minHeight=animated?'0':`${Math.max(160,maxText)}px`;
     box.style.height=viewport.vertical?`${3*viewport.stepGap+maxText+8}px`:(animated?`${Math.min(maxText+8,viewport.descriptionHeight)}px`:'');
-    descriptions.forEach((p,i)=>{p.style.top=viewport.vertical?`${i*viewport.stepGap}px`:'';});
+    descriptions.forEach((p,i)=>{style(p,'top',viewport.vertical?`${i*viewport.stepGap}px`:'');});
     needsMeasurement=false;
   }
 
@@ -143,17 +147,16 @@ export function initializeHomepage() {
     const scroll=Math.max(0,window.scrollY-rootTop),progress=scroll/height;
     time=animated?DURATION*clamp((scroll-height*1.2)/viewport.distance):DURATION;
     const pan=animated?timelinePan(time,viewport):0;
-    host.style.transform=pan?`translateY(${-pan}px)`:'';
-    host.style.clipPath=pan?`inset(${pan}px 0 0 0)`:'';
+    style(host,'transform',pan?`translate3d(0,${-pan}px,0)`:'');
     let points;
     if(animated){
       const rise=clamp(progress/.8),settle=smooth((progress-.8)/.4);
-      image.style.transform=`translate(-50%,${-rise*height*.65}px)`;
-      image.style.opacity=String((.55+.45*rise)*(1-smooth((progress-.8)/.3)));
-      image.style.visibility=progress>=1.1?'hidden':'visible';
-      title.style.transform=`translate(-50%,${-settle*height*.14}px) scale(${1-settle*.48})`;
-      hint.style.opacity=String(1-clamp(progress*4));
-      host.style.opacity=progress>=1.2?'1':'0';
+      style(image,'transform',`translate(-50%,${-rise*height*.65}px)`);
+      style(image,'opacity',String((.55+.45*rise)*(1-smooth((progress-.8)/.3))));
+      style(image,'visibility',progress>=1.1?'hidden':'visible');
+      style(title,'transform',`translate(-50%,${-settle*height*.14}px) scale(${1-settle*.48})`);
+      style(hint,'opacity',String(1-clamp(progress*4)));
+      style(host,'opacity',progress>=1.2?'1':'0');
       // Let the hero render first. Prepare geography during its exit, before the map appears.
       if(!mapReady&&progress>=.8)drawMap();
       if(mapReady)points=paintMap();
@@ -161,8 +164,8 @@ export function initializeHomepage() {
     const focus=focusState(time);
     links.forEach((link,i)=>{
       const reveal=animated?titleOpacity(time,i):1;
-      link.style.opacity=String(reveal);link.style.visibility=reveal>0?'visible':'hidden';link.inert=reveal<.95;
-      link.style.fontSize=animated?(viewport.vertical?'24px':`${Math.min(32,(width/4-16)/5.8)}px`):'';
+      style(link,'opacity',String(reveal));style(link,'visibility',reveal>0?'visible':'hidden');if(link.inert!==(reveal<.95))link.inert=reveal<.95;
+      style(link,'fontSize',animated?(viewport.vertical?'24px':`${Math.min(32,(width/4-16)/5.8)}px`):'');
     });
     const requested=keyboardIndex>=0?keyboardIndex:pointerIndex;
     const nextManual=requested>=0&&!links[requested].inert?requested:-1;
@@ -174,10 +177,10 @@ export function initializeHomepage() {
     const manualExiting=exitUntil.some(t=>t>now);
     links.forEach((link,i)=>{
       link.classList.toggle('is-selected',manualIndex===i);
-      markers[i].style.transform=`translate(-50%,-50%) rotate(${turns[i]}deg)`;
-      markers[i].style.opacity=(!animated||manualIndex===i||exitUntil[i]>now)?'1':'0';
+      style(markers[i],'transform',`translate(-50%,-50%) rotate(${turns[i]}deg)`);
+      style(markers[i],'opacity',(!animated||manualIndex===i||exitUntil[i]>now)?'1':'0');
       const emphasis=manualIndex>=0?(manualIndex===i?1:0):(focus.index===i?focus.text:0);
-      link.style.color=`color-mix(in srgb,var(--ink) ${emphasis*100}%,var(--muted))`;
+      style(link,'color',`color-mix(in srgb,var(--ink) ${emphasis*100}%,var(--muted))`);
     });
     if(animated&&mapReady){
       const show=focus.index>=0&&manualIndex<0&&!manualExiting;
@@ -186,7 +189,7 @@ export function initializeHomepage() {
         const order=[...points].reverse(),from=order[focus.index],to=order[Math.min(3,focus.index+1)];
         const x=from[0]+(to[0]-from[0])*focus.travel,y=from[1]+(to[1]-from[1])*focus.travel;
         attr(ring,{points:diamond(x,y,5.5+12.5*focus.growth),transform:`rotate(${focus.angle} ${x} ${y})`,'stroke-opacity':focus.growth});
-        ring.style.fill=`color-mix(in srgb,var(--ink) ${(1-focus.growth)*100}%,var(--paper))`;
+        style(ring,'fill',`color-mix(in srgb,var(--ink) ${(1-focus.growth)*100}%,var(--paper))`);
       }
     }
     const desiredIndex=manualIndex>=0?manualIndex:focus.index;
@@ -196,8 +199,8 @@ export function initializeHomepage() {
     else textOpacity+=Math.sign(desiredOpacity-textOpacity)*Math.min(Math.abs(desiredOpacity-textOpacity),speed);
     descriptions.forEach((p,i)=>{
       const opacity=viewport.vertical?(animated?titleOpacity(time,i):1):(i===textIndex?textOpacity:0);
-      p.style.opacity=String(opacity);p.style.visibility=opacity>0?'visible':'hidden';
-      p.style.transform=`translateY(${(1-opacity)*8}px)`;attr(p,{'aria-hidden':opacity===0});
+      style(p,'opacity',String(opacity));style(p,'visibility',opacity>0?'visible':'hidden');
+      style(p,'transform',`translateY(${(1-opacity)*8}px)`);attr(p,{'aria-hidden':opacity===0});
     });
     if((!viewport.vertical&&(textIndex!==desiredIndex||Math.abs(textOpacity-desiredOpacity)>.001))||manualExiting)schedule();
     else lastTime=0;
