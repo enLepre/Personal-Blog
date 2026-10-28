@@ -59,6 +59,7 @@ const stops = home.data.career;
   .is-animated .home-stage { position:sticky; top:0; height:100svh; padding:0; overflow:hidden; }
   .is-animated .home-title { position:absolute; z-index:3; top:18%; left:50%; width:min(860px,100%); transform:translateX(-50%); transform-origin:center top; }
   .is-animated .home-landscape-motion { position:absolute; top:43%; left:50%; margin:0; transform:translateX(-50%); opacity:.55; }
+  .is-animated .home-landscape-motion, .is-animated .home-title { will-change:transform,opacity; }
   .is-animated .home-journey { position:absolute; top:var(--journey-top,110px); left:0; right:0; max-width:1024px; margin:0 auto; opacity:0; }
   .is-animated .journey-map { display:block; }
   .is-animated .journey-menu { position:absolute; inset:calc(var(--journey-line-y,275px) - 76px) 0 auto; }
@@ -118,8 +119,13 @@ const stops = home.data.career;
 <script>
   import { initializeHomepage } from '../scripts/homepage-journey.js';
   let cleanup = () => {};
-  const initialize = () => { cleanup(); cleanup = initializeHomepage(); };
-  document.addEventListener('astro:before-swap', () => cleanup());
+  let currentRoot: Element | null = null;
+  const initialize = () => {
+    const root = document.querySelector('[data-home-scroll]');
+    if (root === currentRoot) return;
+    cleanup(); currentRoot = root; cleanup = initializeHomepage();
+  };
+  document.addEventListener('astro:before-swap', () => { cleanup(); currentRoot = null; });
   document.addEventListener('astro:page-load', initialize);
   initialize();
 </script>

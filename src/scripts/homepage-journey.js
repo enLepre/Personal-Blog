@@ -19,10 +19,13 @@ export function initializeHomepage() {
   let strokes=[],inkLength=0,paths=[],pins=[],labels=[],positions=[],ring;
   let textIndex=-1,textOpacity=0,manualIndex=-1;
   const turns=[45,45,45,45],exitUntil=[0,0,0,0];
-  const attr=(node,values)=>{ for(const [name,value] of Object.entries(values))node.setAttribute(name,String(value)); return node; };
+  const attributes=new WeakMap();
+  const attr=(node,values)=>{ let previous=attributes.get(node);if(!previous){previous={};attributes.set(node,previous);}for(const [name,value] of Object.entries(values)){const next=String(value);if(previous[name]!==next){node.setAttribute(name,next);previous[name]=next;}} return node; };
+  let lastInk='',lastGeometry=-1,lastPaint=-1,cachedPoints=[],mapReady=false,landGroup,textGroup;
   const element=(name,parent,values={})=>{const node=document.createElementNS('http://www.w3.org/2000/svg',name);attr(node,values);parent.append(node);return node;};
 
   function drawMap() {
+    lastInk='';lastGeometry=-1;lastPaint=-1;cachedPoints=[];
     const {compact,mapHeight}=viewport;
     svg.replaceChildren();attr(svg,{viewBox:`0 0 ${width} ${viewport.vertical?Math.max(mapHeight,viewport.contentHeight):mapHeight}`});
     const project=projection(width,mapHeight,viewport),defs=element('defs',svg);
@@ -32,16 +35,20 @@ export function initializeHomepage() {
       const mask=element('mask',defs,{id:`journey-mask-${axis}`});element('rect',mask,{width,height:mapHeight,fill:`url(#journey-edge-${axis})`});
     }
     const land=element('g',element('g',svg,{mask:'url(#journey-mask-x)'}),{mask:'url(#journey-mask-y)'});
+    landGroup=land;
     strokes=boundaries.flatMap(line=>clipPolyline(line.map(project),width,mapHeight)).map(line=>{
       let points=line;
       const closed=Math.hypot(points[0][0]-points.at(-1)[0],points[0][1]-points.at(-1)[1])<.01;
       if(closed){points.pop();let top=0;points.forEach((p,i)=>{if(p[1]<points[top][1])top=i;});points=[...points.slice(top),...points.slice(0,top)];points.push(points[0]);}
       else if(points.at(-1)[1]<points[0][1])points.reverse();
       const node=element('path',land,{class:'journey-land',d:'M'+points.map(p=>p.join(',')).join('L')});
-      return {node,length:node.getTotalLength(),first:points[0]};
+      // These paths are polylines: calculate their exact length without forcing SVG layout.
+      const length=points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p[0]-points[i][0],p[1]-points[i][1]),0);
+      return {node,length,first:points[0]};
     }).filter(s=>s.length>.1).sort((a,b)=>a.first[1]-b.first[1]||a.first[0]-b.first[0]);
     inkLength=0;strokes.forEach(s=>{s.start=inkLength;inkLength+=s.length;attr(s.node,{'stroke-dasharray':`${s.length} ${s.length}`});});
     const route=element('g',svg),nodes=element('g',svg),text=element('g',svg);
+    textGroup=text;
     paths=Array.from({length:3},()=>element('path',route,{class:'journey-route',pathLength:1,'stroke-dasharray':'1 1'}));
     positions=stops.map(stop=>project([stop.longitude,stop.latitude]));
     pins=positions.map(()=>element('polygon',nodes,{class:'journey-pin'}));
@@ -68,6 +75,7 @@ export function initializeHomepage() {
       lines.forEach(line=>{add(line,cursor,'journey-role');cursor+=compact?18:20;});
       topics.forEach(line=>{add(line,cursor+2,'journey-topic');cursor+=compact?16:20;});return group;
     });
+    mapReady=true;
   }
 
   function measure() {
@@ -89,8 +97,8 @@ export function initializeHomepage() {
     root.style.setProperty('--journey-line-start',`${viewport.lineStart}px`);
     root.style.setProperty('--journey-step-gap',`${viewport.stepGap}px`);
     root.style.setProperty('--journey-description-top',`${viewport.descriptionTop}px`);
-    if(animated)drawMap();
-    else {svg.replaceChildren();title.style.transform='';image.style.transform='';image.style.opacity='';image.style.visibility='';host.style.opacity='';}
+    mapReady=false;
+    if(!animated){svg.replaceChildren();title.style.transform='';image.style.transform='';image.style.opacity='';image.style.visibility='';host.style.opacity='';}
     const box=root.querySelector('.journey-descriptions');
     box.style.minHeight=animated?'0':`${Math.max(160,maxText)}px`;
     box.style.height=viewport.vertical?`${3*viewport.stepGap+maxText+8}px`:(animated?`${Math.min(maxText+8,viewport.descriptionHeight)}px`:'');
@@ -99,13 +107,27 @@ export function initializeHomepage() {
   }
 
   function paintMap() {
+    if(time===lastPaint)return cachedPoints;
+    lastPaint=time;
     const drawn=clamp((time-.08)/1.92)*inkLength,erased=clamp((time-5.7)/1.4)*inkLength;
-    strokes.forEach(s=>{
+    attr(landGroup,{display:drawn>0&&erased<inkLength?'inline':'none'});
+    attr(textGroup,{display:time<7.1?'inline':'none'});
+    const ink=`${drawn}:${erased}`;
+    if(ink!==lastInk)strokes.forEach(s=>{
       const visible=Math.max(0,Math.min(s.length,drawn-s.start)),removed=clamp((erased-s.start)/s.length)*s.length;
       attr(s.node,{'stroke-dashoffset':erased>0?-removed:s.length-visible,visibility:visible>0&&removed<s.length?'visible':'hidden'});
     });
-    const motion=routeMotion(time,width,positions,viewport),points=positions.map((_,i)=>motion.point(i));
-    paths.forEach((path,i)=>attr(path,{d:curvePath(Array.from({length:25},(_,j)=>motion.point(i+j/24))),'stroke-dashoffset':1-smooth((time-2.4-i-.12)/.66),visibility:time>2.4+i+.12?'visible':'hidden'}));
+    lastInk=ink;
+    // Geometry only changes during the map-to-menu morph, never during hover or reading.
+    const geometryTime=Math.max(7.05,Math.min(10.65,time));
+    if(geometryTime!==lastGeometry){
+      const motion=routeMotion(geometryTime,width,positions,viewport);
+      cachedPoints=positions.map((_,i)=>motion.point(i));
+      paths.forEach((path,i)=>attr(path,{d:geometryTime===7.05||geometryTime===10.65?`M${cachedPoints[i]}L${cachedPoints[i+1]}`:curvePath(Array.from({length:25},(_,j)=>motion.point(i+j/24)))}));
+      lastGeometry=geometryTime;
+    }
+    const points=cachedPoints;
+    paths.forEach((path,i)=>attr(path,{'stroke-dashoffset':1-smooth((time-2.4-i-.12)/.66),visibility:time>2.4+i+.12?'visible':'hidden'}));
     pins.forEach((pin,i)=>{
       const reveal=i===0?smooth((time-2.12)/.22):smooth((time-2.4-(i-1)-.8)/.16);
       attr(pin,{points:diamond(...points[i],5.5*reveal),opacity:reveal});
@@ -131,7 +153,10 @@ export function initializeHomepage() {
       image.style.visibility=progress>=1.1?'hidden':'visible';
       title.style.transform=`translate(-50%,${-settle*height*.14}px) scale(${1-settle*.48})`;
       hint.style.opacity=String(1-clamp(progress*4));
-      host.style.opacity=progress>=1.2?'1':'0';points=paintMap();
+      host.style.opacity=progress>=1.2?'1':'0';
+      // Let the hero render first. Prepare geography during its exit, before the map appears.
+      if(!mapReady&&progress>=.8)drawMap();
+      if(mapReady)points=paintMap();
     }
     const focus=focusState(time);
     links.forEach((link,i)=>{
@@ -154,7 +179,7 @@ export function initializeHomepage() {
       const emphasis=manualIndex>=0?(manualIndex===i?1:0):(focus.index===i?focus.text:0);
       link.style.color=`color-mix(in srgb,var(--ink) ${emphasis*100}%,var(--muted))`;
     });
-    if(animated){
+    if(animated&&mapReady){
       const show=focus.index>=0&&manualIndex<0&&!manualExiting;
       attr(ring,{opacity:show?1:0});
       if(show){
@@ -172,9 +197,9 @@ export function initializeHomepage() {
     descriptions.forEach((p,i)=>{
       const opacity=viewport.vertical?(animated?titleOpacity(time,i):1):(i===textIndex?textOpacity:0);
       p.style.opacity=String(opacity);p.style.visibility=opacity>0?'visible':'hidden';
-      p.style.transform=`translateY(${(1-opacity)*8}px)`;p.setAttribute('aria-hidden',String(opacity===0));
+      p.style.transform=`translateY(${(1-opacity)*8}px)`;attr(p,{'aria-hidden':opacity===0});
     });
-    if(textIndex!==desiredIndex||Math.abs(textOpacity-desiredOpacity)>.001||manualExiting)schedule();
+    if((!viewport.vertical&&(textIndex!==desiredIndex||Math.abs(textOpacity-desiredOpacity)>.001))||manualExiting)schedule();
     else lastTime=0;
   }
   function schedule(){if(!frame)frame=requestAnimationFrame(update);}
@@ -192,7 +217,7 @@ export function initializeHomepage() {
   reduced.addEventListener('change',invalidate,options);
   const observer=new ResizeObserver(entries=>{if(entries.some(entry=>entry.target===host&&Math.abs(entry.contentRect.width-width)>.5))resize();});
   observer.observe(host);
-  document.fonts?.ready.then(()=>{if(!controller.signal.aborted)invalidate();});
+  if(document.fonts?.status==='loading')document.fonts.ready.then(()=>{if(!controller.signal.aborted)invalidate();});
   update();
   return ()=>{controller.abort();observer.disconnect();cancelAnimationFrame(frame);};
 }

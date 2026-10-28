@@ -6,13 +6,14 @@ import * as geometry from '../src/lib/homepage-journey.mjs';
 
 function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHeight=800}={}) {
   let measurements=0,now=100,pending;
+  const work={attributes:0,curves:0,lengthReads:0,builds:0};
   class Element {
     constructor(){this.style={setProperty(k,v){this[k]=v;}};this.attributes={};this.children=[];this.listeners={};this.inert=false;this.dataset={};this.offsetHeight=90;this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
-    setAttribute(k,v){this.attributes[k]=v;}
+    setAttribute(k,v){work.attributes++;this.attributes[k]=v;}
     append(node){this.children.push(node);}
-    replaceChildren(){this.children=[];}
+    replaceChildren(){work.builds++;this.children=[];}
     addEventListener(name,handler,options){this.listeners[name]={handler,signal:options?.signal};}
-    getTotalLength(){return 50;}
+    getTotalLength(){work.lengthReads++;return 50;}
     getComputedTextLength(){return (this.textContent||'').length*7;}
     remove(){}
   }
@@ -30,16 +31,40 @@ function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHe
   const media=new Element();media.matches=reduced;
   const source=readFileSync('src/scripts/homepage-journey.js','utf8').replace(/^import .*;\r?\n/gm,'').replace('export function','function');
   const cleanup=vm.runInNewContext(source+';initializeHomepage();',{
-    ...geometry,boundaries:[[[0,40],[10,50],[10,60]]],document,window,AbortController,
+    ...geometry,curvePath(points){work.curves++;return geometry.curvePath(points);},boundaries:JSON.parse(readFileSync('src/data/europe-boundaries.json','utf8')),document,window,AbortController,
     performance:{now:()=>now},matchMedia:()=>media,ResizeObserver:class{observe(){}disconnect(){}},
     requestAnimationFrame(callback){pending=callback;return 1;},cancelAnimationFrame(){pending=undefined;}
   });
   const flush=()=>{for(let i=0;pending&&i<100;i++){const cb=pending;pending=undefined;now+=20;cb(now);}assert.equal(pending,undefined,'animation settles without an idle loop');};
   const scrollTo=value=>{window.scrollY=value;window.listeners.scroll.handler();flush();};
   const event=(index,name)=>{links[index].listeners[name].handler({pointerType:'mouse'});flush();};
-  return {root,links,descriptions,title,image,window,host,svg,cleanup,flush,scrollTo,event,measurements:()=>measurements,
+  return {root,links,descriptions,title,image,window,host,svg,work,cleanup,flush,scrollTo,event,measurements:()=>measurements,
     rotate(w,h){window.innerWidth=w;window.innerHeight=h;stageHeight=h;host.clientWidth=w-(w<=700?36:48);window.listeners.resize.handler();flush();}};
 }
+for(const mobile of [false,true])test(`map work is bounded to its visible animation, mobile=${mobile}`,()=>{
+  const f=fixture({mobile});
+  assert.equal(f.work.builds,0,'initial hero does not synchronously construct the map');
+  const distance=parseFloat(f.root.style.height)-800*2.2;
+  const seek=time=>f.scrollTo(960+distance*time/19);
+  seek(1);
+  assert.equal(f.work.builds,1);
+  assert.equal(f.work.lengthReads,0,'polyline length requires no SVG layout reads');
+  assert.equal(f.work.curves,0,'initial straight connections need no curve sampling');
+  seek(8);
+  assert.equal(f.work.curves,3,'morph computes one curve per connection');
+  seek(19);
+  const curves=f.work.curves,attributes=f.work.attributes;
+  seek(19);
+  assert.equal(f.work.attributes,attributes,'unchanged frame performs no SVG/ARIA attribute writes');
+  f.event(0,'pointerenter');f.event(0,'pointerleave');
+  assert.equal(f.work.curves,curves,'hover never recomputes settled route geometry');
+  seek(8);
+  assert.equal(f.work.curves,curves+3,'reverse scrolling restores curved geometry');
+  seek(1);
+  assert.equal(f.work.builds,1,'reverse scrolling reuses the same map');
+  f.cleanup();
+});
+
 test('scroll reuses geometry measurements, reveals navigation, and ends empty',()=>{
   const f=fixture();assert.equal(f.measurements(),2);
   assert.equal(f.root.classes.has('is-vertical'),false,'desktop keeps its horizontal layout');
@@ -70,9 +95,9 @@ for(const [screenWidth,stageHeight] of [[320,568],[375,667],[390,844],[430,932],
   assert.equal(f.root.classes.has('is-animated'),true);
   assert.equal(f.root.classes.has('is-compact'),true);
   assert.equal(f.root.classes.has('is-vertical'),true);
-  assert.ok(f.svg.children.length>0,'map geometry exists');
   const distance=parseFloat(f.root.style.height)-stageHeight*2.2;
   f.scrollTo(stageHeight*1.2+distance*.25);
+  assert.ok(f.svg.children.length>0,'map geometry exists when needed');
   assert.ok(f.links.every(link=>link.inert),'navigation cannot be tapped during the map phase');
   f.scrollTo(stageHeight*1.2+distance*12.2/19);
   assert.equal(f.descriptions[0].style.opacity,'1');
