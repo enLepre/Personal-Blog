@@ -42,6 +42,7 @@ function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHe
 }
 test('scroll reuses geometry measurements, reveals navigation, and ends empty',()=>{
   const f=fixture();assert.equal(f.measurements(),2);
+  assert.equal(f.root.classes.has('is-vertical'),false,'desktop keeps its horizontal layout');
   assert.ok(f.links.every(link=>link.inert));
   f.scrollTo(5000);f.scrollTo(6960);
   assert.equal(f.measurements(),2);assert.ok(f.links.every(link=>!link.inert&&link.style.opacity==='1'));
@@ -51,7 +52,7 @@ test('scroll reuses geometry measurements, reveals navigation, and ends empty',(
   f.scrollTo(6800);assert.equal(f.title.style.transform,finalTransform,'title remains settled');
   f.cleanup();assert.equal(f.window.listeners.scroll.signal.aborted,true);
 });
-for(const options of [{},{reduced:true},{mobile:true}])test(`hover and keyboard reveal one description and clear it on exit ${JSON.stringify(options)}`,()=>{
+for(const options of [{},{reduced:true},{mobile:true},{reduced:true,mobile:true}])test(`hover and keyboard reveal one description and clear it on exit ${JSON.stringify(options)}`,()=>{
   const f=fixture(options);f.scrollTo(6960);
   f.event(0,'pointerenter');assert.equal(f.descriptions[0].style.opacity,'1');
   assert.ok(f.links[0].classes.has('is-selected'));
@@ -68,14 +69,25 @@ for(const [screenWidth,stageHeight] of [[320,568],[375,667],[390,844],[430,932],
   const f=fixture({screenWidth,stageHeight});
   assert.equal(f.root.classes.has('is-animated'),true);
   assert.equal(f.root.classes.has('is-compact'),true);
+  assert.equal(f.root.classes.has('is-vertical'),true);
   assert.ok(f.svg.children.length>0,'map geometry exists');
   const distance=parseFloat(f.root.style.height)-stageHeight*2.2;
   f.scrollTo(stageHeight*1.2+distance*.25);
   assert.ok(f.links.every(link=>link.inert),'navigation cannot be tapped during the map phase');
   f.scrollTo(stageHeight*1.2+distance*12.2/19);
   assert.equal(f.descriptions[0].style.opacity,'1');
+  const findRing=node=>node.attributes?.class==='journey-ring'?node:node.children?.map(findRing).find(Boolean);
+  const ring=findRing(f.svg);
+  const center=()=>{const points=ring.attributes.points.split(' ').map(pair=>pair.split(',').map(Number));return [points.reduce((sum,p)=>sum+p[0],0)/4,points.reduce((sum,p)=>sum+p[1],0)/4];};
+  const researchPosition=center();
+  assert.ok(Math.abs(researchPosition[0]-24)<.001);
+  assert.ok(Math.abs(researchPosition[1]-28)<.001,'first menu node starts at the top');
+  f.scrollTo(stageHeight*1.2+distance*13.85/19);
+  const publicationsPosition=center();
+  assert.ok(Math.abs(publicationsPosition[0]-researchPosition[0])<.001);
+  assert.ok(publicationsPosition[1]>researchPosition[1],'selection moves down the vertical rail');
   f.scrollTo(stageHeight*1.2+distance);
-  assert.ok(f.links.every(link=>!link.inert&&parseFloat(link.style.fontSize)>=18));
+  assert.ok(f.links.every(link=>!link.inert&&parseFloat(link.style.fontSize)>=24));
   assert.ok(f.descriptions.every(p=>p.style.opacity==='0'));
   const heightBefore=f.root.style.height,transformBefore=f.title.style.transform;
   f.window.innerHeight+=60;f.window.listeners.resize.handler();f.flush();

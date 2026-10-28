@@ -82,7 +82,10 @@ from `src/content/sections/{research,publications,notes,about}.md`: `title` and
 800px reading column. They are not duplicated in the animation code.
 
 Phone and short viewports keep the full scroll animation, with wrapped map labels,
-staggered section titles, a shorter scroll distance, and descriptions sized to the
+a vertical navigation line and full-size titles to its right. The map route opens
+smoothly into this rail, and the diamond highlight travels from top to bottom.
+Descriptions appear below the menu, aligned with its titles. Desktop retains the
+horizontal line. Phones use a shorter scroll distance and descriptions sized to the
 available space. Section links open with a normal tap; scrolling previews their
 descriptions. Only reduced-motion settings use a static, accessible menu with
 the same links and hover/focus descriptions. The original homepage

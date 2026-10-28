@@ -97,6 +97,19 @@ const stops = home.data.career;
   .is-compact .journey-city { font-size:13px; }
   .is-compact .journey-role { font-size:16px; }
   .is-compact .journey-topic { font-size:12px; }
+  /* Phones use a vertical rail, with full-size titles to the right. */
+  .is-vertical .journey-menu { display:flex; flex-direction:column; gap:0; }
+  .is-animated.is-vertical .journey-menu { top:calc(var(--journey-line-start) - 22px); }
+  .is-vertical .journey-link,
+  .is-animated.is-vertical .journey-link { flex:none; min-height:0; height:var(--journey-step-gap,76px); padding:0; justify-content:flex-start; }
+  .is-vertical .journey-link:nth-child(n) .journey-label,
+  .is-animated.is-vertical .journey-link:nth-child(n) .journey-label { position:absolute; top:7px; left:62px; right:0; width:auto; transform:none; text-align:left; }
+  .is-vertical .journey-hover-marker,
+  .is-animated.is-vertical .journey-hover-marker { left:var(--journey-line-x,24px); top:22px; }
+  .is-vertical .journey-descriptions,
+  .is-animated.is-vertical .journey-descriptions { width:calc(100% - 78px); margin-left:62px; }
+  .is-animated.is-vertical .journey-descriptions { top:var(--journey-description-top); left:0; transform:none; }
+  .is-vertical:not(.is-animated) .journey-menu::before { content:''; position:absolute; top:22px; left:24px; height:calc(3 * var(--journey-step-gap,76px)); width:1.7px; background:var(--ink); }
 </style>
 <script>
   import { initializeHomepage } from '../scripts/homepage-journey.js';

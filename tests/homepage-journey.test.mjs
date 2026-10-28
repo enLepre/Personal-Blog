@@ -40,6 +40,9 @@ for(const [width,height,textHeight] of [[284,568,140],[339,667,120],[354,844,120
   const before=routeMotion(8.24,width,layout,viewport).point(0),after=routeMotion(8.26,width,layout,viewport).point(0);
   assert.ok(Math.hypot(after[0]-before[0],after[1]-before[1])>.1);
   const end=routeMotion(10.65,width,layout,viewport);
-  cities.forEach((_,i)=>{assert.ok(Math.abs(end.point(i)[1]-viewport.lineY)<1e-8);assert.ok(Math.abs(end.point(i)[0]-(width*.875-width*.25*i))<1e-8);});
-  assert.ok(viewport.top+viewport.lineY+40+Math.min(textHeight,viewport.descriptionHeight)<=height-24);
+  cities.forEach((_,i)=>{
+    if(viewport.vertical){assert.ok(Math.abs(end.point(i)[0]-viewport.lineX)<1e-8);assert.ok(Math.abs(end.point(i)[1]-(viewport.lineEnd-i*viewport.stepGap))<1e-8);}
+    else {assert.ok(Math.abs(end.point(i)[1]-viewport.lineY)<1e-8);assert.ok(Math.abs(end.point(i)[0]-(width*.875-width*.25*i))<1e-8);}
+  });
+  assert.ok(viewport.top+viewport.descriptionTop+Math.min(textHeight,viewport.descriptionHeight)<=height-24);
 });

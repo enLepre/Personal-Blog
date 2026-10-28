@@ -75,6 +75,7 @@ export function initializeHomepage() {
     root.classList.toggle('is-animated',animated);
     height=stage.clientHeight;width=host.clientWidth;
     root.classList.toggle('is-compact',width<=664||height<680);
+    root.classList.toggle('is-vertical',width<=664||height<680);
     const maxText=Math.max(...descriptions.map(p=>p.offsetHeight));
     viewport=viewportLayout(width,height,maxText);
     rootTop=root.getBoundingClientRect().top+window.scrollY;
@@ -83,6 +84,10 @@ export function initializeHomepage() {
     root.style.setProperty('--journey-line-y',`${viewport.lineY}px`);
     root.style.setProperty('--journey-map-height',`${viewport.mapHeight}px`);
     root.style.setProperty('--journey-description-height',`${viewport.descriptionHeight}px`);
+    root.style.setProperty('--journey-line-x',`${viewport.lineX}px`);
+    root.style.setProperty('--journey-line-start',`${viewport.lineStart}px`);
+    root.style.setProperty('--journey-step-gap',`${viewport.stepGap}px`);
+    root.style.setProperty('--journey-description-top',`${viewport.descriptionTop}px`);
     if(animated)drawMap();
     else {svg.replaceChildren();title.style.transform='';image.style.transform='';image.style.opacity='';image.style.visibility='';host.style.opacity='';}
     const box=root.querySelector('.journey-descriptions');
@@ -127,7 +132,7 @@ export function initializeHomepage() {
     links.forEach((link,i)=>{
       const reveal=animated?titleOpacity(time,i):1;
       link.style.opacity=String(reveal);link.style.visibility=reveal>0?'visible':'hidden';link.inert=reveal<.95;
-      link.style.fontSize=animated?(viewport.compact?'18px':`${Math.min(32,(width/4-16)/5.8)}px`):'';
+      link.style.fontSize=animated?(viewport.vertical?'24px':`${Math.min(32,(width/4-16)/5.8)}px`):'';
     });
     const requested=keyboardIndex>=0?keyboardIndex:pointerIndex;
     const nextManual=requested>=0&&!links[requested].inert?requested:-1;

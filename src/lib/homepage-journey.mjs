@@ -9,8 +9,12 @@ export function viewportLayout(width,height,textHeight) {
   const top=compact?(height<500?68:88):110;
   const available=Math.max(160,height-top-24);
   const lineY=Math.max(90,Math.min(compact?260:275,available-textHeight-48));
-  return {compact,top,lineY,mapHeight:compact?Math.min(500,available):560,
-    descriptionHeight:Math.max(60,available-lineY-40),
+  const vertical=compact,lineX=24,lineStart=28;
+  const stepGap=Math.max(44,Math.min(76,(available-textHeight-lineStart-48)/3));
+  const lineEnd=lineStart+3*stepGap;
+  const descriptionTop=vertical?lineEnd+40:lineY+40;
+  return {compact,vertical,top,lineY,lineX,lineStart,lineEnd,stepGap,descriptionTop,mapHeight:compact?Math.min(500,available):560,
+    descriptionHeight:Math.max(60,available-descriptionTop),
     distance:compact?Math.round(Math.max(2600,Math.min(4500,height*6))):6000};
 }
 export function projection(width, height, {compact=false}={}) {
@@ -37,7 +41,7 @@ export function clipPolyline(points,width,height) {
   }
   if(path.length>1)paths.push(path);return paths;
 }
-export function routeMotion(time, width, layout, {lineY=275,mapHeight=560}={}) {
+export function routeMotion(time, width, layout, {lineY=275,mapHeight=560,vertical=false,lineX=24,lineStart=28,lineEnd=256}={}) {
   const progress = smooth((time-7.1)/3.55);
   // Overlapping deformation and opening: no stationary circular keyframe.
   const form = 1-(1-progress)**3, open = progress;
@@ -56,7 +60,16 @@ export function routeMotion(time, width, layout, {lineY=275,mapHeight=560}={}) {
     });
     const u=(t/3-.5)*sweep;
     const arc=sweep<.00001?[cx+(t/3-.5)*length,base]:[cx+length/sweep*Math.sin(u),base-2*length/sweep*Math.sin(u/2)**2];
-    const destination=[2*cx-arc[0],2*cy-arc[1]];
+    let destination=[2*cx-arc[0],2*cy-arc[1]];
+    if(vertical){
+      // An open curve bows to the right of the rail and straightens continuously.
+      // Keep the same node order, so the section highlight travels top to bottom.
+      const angle=Math.PI*(1-open),span=lineEnd-lineStart,center=(lineStart+lineEnd)/2;
+      const arcLength=radius*Math.PI*(1-open)+span*open;
+      if(angle<.00001)destination=[lineX,lineEnd-span*t/3];
+      else {const r=arcLength/angle,u=(.5-t/3)*angle;
+        destination=[lineX+r*(Math.cos(u)-Math.cos(angle/2)),center+r*Math.sin(u)];}
+    }
     return original.map((n,k)=>n+(destination[k]-n)*form);
   }
   return {point,form,open};
