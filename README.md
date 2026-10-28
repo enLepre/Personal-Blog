@@ -81,8 +81,11 @@ from `src/content/sections/{research,publications,notes,about}.md`: `title` and
 `lead` (or `preview` when `lead` is empty). Descriptions use a centered, justified
 800px reading column. They are not duplicated in the animation code.
 
-Narrow or short viewports and reduced-motion settings use a static, accessible
-menu with the same links and hover/focus descriptions. The original homepage
+Phone and short viewports keep the full scroll animation, with wrapped map labels,
+staggered section titles, a shorter scroll distance, and descriptions sized to the
+available space. Section links open with a normal tap; scrolling previews their
+descriptions. Only reduced-motion settings use a static, accessible menu with
+the same links and hover/focus descriptions. The original homepage
 remains available through `homepageAnimation: false`. The map data is local and
 requires no new runtime dependency or external map service.
 

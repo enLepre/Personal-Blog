@@ -43,7 +43,7 @@ const stops = home.data.career;
   .home-title { max-width:860px; margin:0 auto; text-align:center; font-size:clamp(48px,9vw,104px); font-weight:400; line-height:.95; letter-spacing:-.055em; }
   .home-landscape { display:block; width:min(560px,100%); height:auto; max-height:48svh; object-fit:contain; margin:44px auto 0; }
   .home-journey { position:relative; margin:64px auto 0; }
-  .journey-map { display:none; width:100%; height:560px; overflow:hidden; }
+  .journey-map { display:none; width:100%; height:var(--journey-map-height,560px); overflow:hidden; }
   .career-accessible { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); }
   .journey-menu { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; width:100%; }
   .journey-link { position:relative; display:flex; align-items:flex-start; justify-content:center; min-height:100px; padding:16px 4px 40px; font-size:clamp(22px,3vw,32px); line-height:1.2; letter-spacing:-.02em; color:var(--muted); }
@@ -59,12 +59,12 @@ const stops = home.data.career;
   .is-animated .home-stage { position:sticky; top:0; height:100svh; padding:0; overflow:hidden; }
   .is-animated .home-title { position:absolute; z-index:3; top:18%; left:50%; width:min(860px,100%); transform:translateX(-50%); transform-origin:center top; }
   .is-animated .home-landscape-motion { position:absolute; top:43%; left:50%; margin:0; transform:translateX(-50%); opacity:.55; }
-  .is-animated .home-journey { position:absolute; top:110px; left:0; right:0; max-width:1024px; margin:0 auto; opacity:0; }
+  .is-animated .home-journey { position:absolute; top:var(--journey-top,110px); left:0; right:0; max-width:1024px; margin:0 auto; opacity:0; }
   .is-animated .journey-map { display:block; }
-  .is-animated .journey-menu { position:absolute; inset:199px 0 auto; }
+  .is-animated .journey-menu { position:absolute; inset:calc(var(--journey-line-y,275px) - 76px) 0 auto; }
   .is-animated .journey-link { opacity:0; visibility:hidden; }
   .is-animated .journey-hover-marker { opacity:0; }
-  .is-animated .journey-descriptions { position:absolute; top:319px; left:50%; transform:translateX(-50%); margin:0; }
+  .is-animated .journey-descriptions { position:absolute; top:calc(var(--journey-line-y,275px) + 40px); left:50%; transform:translateX(-50%); margin:0; overflow-y:auto; overscroll-behavior:contain; }
   .is-animated .scroll-hint { display:block; position:absolute; bottom:38px; left:50%; transform:translateX(-50%); color:var(--muted); font-size:13px; letter-spacing:.04em; }
   .scroll-hint span { margin-left:12px; }
   .journey-land { fill:none; stroke:var(--muted); stroke-opacity:.35; stroke-width:.8; stroke-linejoin:round; }
@@ -85,6 +85,18 @@ const stops = home.data.career;
     .journey-descriptions { width:100%; min-height:190px; }
   }
   @media(prefers-reduced-motion:reduce) { .journey-hover-marker,.journey-label { transition:none; } }
+  .is-animated.is-compact .journey-menu { grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; top:calc(var(--journey-line-y) - 96px); }
+  .is-animated.is-compact .journey-link { min-height:120px; padding:0; }
+  .is-animated.is-compact .journey-label { position:absolute; top:4px; left:50%; transform:translateX(-50%); width:calc(200% - 12px); text-align:center; }
+  .is-animated.is-compact .journey-link:nth-child(even) .journey-label { top:38px; }
+  .is-animated.is-compact .journey-link:first-child .journey-label { left:4px; transform:none; text-align:left; }
+  .is-animated.is-compact .journey-link:last-child .journey-label { left:auto; right:4px; transform:none; text-align:right; }
+  .is-animated.is-compact .journey-hover-marker { top:96px; }
+  .is-animated.is-compact .journey-descriptions { width:calc(100% - 16px); }
+  .is-compact .journey-description { font-size:17px; line-height:1.5; }
+  .is-compact .journey-city { font-size:13px; }
+  .is-compact .journey-role { font-size:16px; }
+  .is-compact .journey-topic { font-size:12px; }
 </style>
 <script>
   import { initializeHomepage } from '../scripts/homepage-journey.js';

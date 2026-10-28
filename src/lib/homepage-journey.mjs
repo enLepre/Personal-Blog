@@ -4,9 +4,19 @@ export const clamp = n => Math.max(0, Math.min(1, n));
 export const smooth = n => { const x = clamp(n); return x*x*x*(x*(x*6-15)+10); };
 export const diamond = (x,y,r) => `${x},${y-r} ${x+r},${y} ${x},${y+r} ${x-r},${y}`;
 const mercatorY = latitude => Math.log(Math.tan(Math.PI/4 + latitude*Math.PI/360));
-export function projection(width, height) {
+export function viewportLayout(width,height,textHeight) {
+  const compact=width<=664 || height<680;
+  const top=compact?(height<500?68:88):110;
+  const available=Math.max(160,height-top-24);
+  const lineY=Math.max(90,Math.min(compact?260:275,available-textHeight-48));
+  return {compact,top,lineY,mapHeight:compact?Math.min(500,available):560,
+    descriptionHeight:Math.max(60,available-lineY-40),
+    distance:compact?Math.round(Math.max(2600,Math.min(4500,height*6))):6000};
+}
+export function projection(width, height, {compact=false}={}) {
   const broad = Math.min((width-48)/(55*Math.PI/180), (height-56)/(mercatorY(72)-mercatorY(32)));
-  const scale = (broad + Math.min(width/.49,1400))/2;
+  const preferred = (broad + Math.min(width/.49,1400))/2;
+  const scale = compact?Math.min(preferred,height*.9):preferred;
   return ([longitude,latitude]) => [width*.52+scale*(longitude-10.8)*Math.PI/180, height*.48-scale*(mercatorY(latitude)-mercatorY(50.5))];
 }
 // Clip before measuring ink length, so off-screen coastlines do not delay drawing.
@@ -27,11 +37,11 @@ export function clipPolyline(points,width,height) {
   }
   if(path.length>1)paths.push(path);return paths;
 }
-export function routeMotion(time, width, layout) {
+export function routeMotion(time, width, layout, {lineY=275,mapHeight=560}={}) {
   const progress = smooth((time-7.1)/3.55);
   // Overlapping deformation and opening: no stationary circular keyframe.
   const form = 1-(1-progress)**3, open = progress;
-  const radius = Math.min(110,width*.22), cx=width/2, cy=275;
+  const radius = Math.min(110,width*.22,mapHeight*.23), cx=width/2, cy=lineY;
   const sweep = 1.5*Math.PI*(1-open);
   const length = radius*1.5*Math.PI*(1-open)+width*.75*open;
   const base=cy+radius*(1-open);

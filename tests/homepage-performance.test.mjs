@@ -4,26 +4,28 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import * as geometry from '../src/lib/homepage-journey.mjs';
 
-function fixture({reduced=false,mobile=false}={}) {
+function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHeight=800}={}) {
   let measurements=0,now=100,pending;
   class Element {
-    constructor(){this.style={};this.attributes={};this.children=[];this.listeners={};this.inert=false;this.dataset={};this.offsetHeight=90;this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
+    constructor(){this.style={setProperty(k,v){this[k]=v;}};this.attributes={};this.children=[];this.listeners={};this.inert=false;this.dataset={};this.offsetHeight=90;this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
     setAttribute(k,v){this.attributes[k]=v;}
     append(node){this.children.push(node);}
     replaceChildren(){this.children=[];}
     addEventListener(name,handler,options){this.listeners[name]={handler,signal:options?.signal};}
     getTotalLength(){return 50;}
+    getComputedTextLength(){return (this.textContent||'').length*7;}
+    remove(){}
   }
   const title=new Element(),image=new Element(),hint=new Element(),host=new Element(),svg=new Element(),box=new Element();
-  host.clientWidth=mobile?360:976;
+  host.clientWidth=screenWidth-(screenWidth<=700?36:48);
   host.dataset.stops=JSON.stringify(['Trieste','Potsdam','Heidelberg','Zurich'].map((city,i)=>({city,longitude:[13.7768,13.0645,8.6724,8.5417][i],latitude:[45.6495,52.3906,49.3988,47.3769][i],title:'Postdoc',topic:'Chemistry'})));
   const links=Array.from({length:4},()=>{const link=new Element();link.marker=new Element();link.querySelector=()=>link.marker;return link;});
   const descriptions=Array.from({length:4},()=>new Element());
-  const stage={get clientHeight(){measurements++;return 800;}};
+  const stage={get clientHeight(){measurements++;return stageHeight;}};
   const elements={'.home-stage':stage,'.home-title':title,'.home-landscape-motion':image,'.scroll-hint':hint,'.home-journey':host,'.journey-map':svg,'.journey-descriptions':box};
   const root=new Element();root.querySelector=s=>elements[s];root.querySelectorAll=s=>s==='.journey-link'?links:descriptions;
   root.getBoundingClientRect=()=>{measurements++;return {top:-window.scrollY};};
-  const window=new Element();window.scrollY=0;window.innerWidth=mobile?390:1024;window.innerHeight=800;
+  const window=new Element();window.scrollY=0;window.innerWidth=screenWidth;window.innerHeight=stageHeight;
   const document={querySelector:()=>root,createElementNS:()=>new Element()};
   const media=new Element();media.matches=reduced;
   const source=readFileSync('src/scripts/homepage-journey.js','utf8').replace(/^import .*;\r?\n/gm,'').replace('export function','function');
@@ -35,7 +37,8 @@ function fixture({reduced=false,mobile=false}={}) {
   const flush=()=>{for(let i=0;pending&&i<100;i++){const cb=pending;pending=undefined;now+=20;cb(now);}assert.equal(pending,undefined,'animation settles without an idle loop');};
   const scrollTo=value=>{window.scrollY=value;window.listeners.scroll.handler();flush();};
   const event=(index,name)=>{links[index].listeners[name].handler({pointerType:'mouse'});flush();};
-  return {root,links,descriptions,title,image,window,cleanup,flush,scrollTo,event,measurements:()=>measurements};
+  return {root,links,descriptions,title,image,window,host,svg,cleanup,flush,scrollTo,event,measurements:()=>measurements,
+    rotate(w,h){window.innerWidth=w;window.innerHeight=h;stageHeight=h;host.clientWidth=w-(w<=700?36:48);window.listeners.resize.handler();flush();}};
 }
 test('scroll reuses geometry measurements, reveals navigation, and ends empty',()=>{
   const f=fixture();assert.equal(f.measurements(),2);
@@ -58,6 +61,27 @@ for(const options of [{},{reduced:true},{mobile:true}])test(`hover and keyboard 
   f.event(2,'focus');assert.equal(f.descriptions[2].style.opacity,'1');
   assert.ok(f.descriptions.filter(p=>p.style.opacity!=='0').length===1);
   f.event(2,'blur');assert.ok(f.descriptions.every(p=>p.style.opacity==='0'));
-  if(options.reduced||options.mobile)assert.equal(f.root.classes.has('is-animated'),false);
+  assert.equal(f.root.classes.has('is-animated'),!options.reduced);
+  f.cleanup();
+});
+for(const [screenWidth,stageHeight] of [[320,568],[375,667],[390,844],[430,932],[844,390]])test(`phone animation draws, morphs and finishes at ${screenWidth}×${stageHeight}`,()=>{
+  const f=fixture({screenWidth,stageHeight});
+  assert.equal(f.root.classes.has('is-animated'),true);
+  assert.equal(f.root.classes.has('is-compact'),true);
+  assert.ok(f.svg.children.length>0,'map geometry exists');
+  const distance=parseFloat(f.root.style.height)-stageHeight*2.2;
+  f.scrollTo(stageHeight*1.2+distance*.25);
+  assert.ok(f.links.every(link=>link.inert),'navigation cannot be tapped during the map phase');
+  f.scrollTo(stageHeight*1.2+distance*12.2/19);
+  assert.equal(f.descriptions[0].style.opacity,'1');
+  f.scrollTo(stageHeight*1.2+distance);
+  assert.ok(f.links.every(link=>!link.inert&&parseFloat(link.style.fontSize)>=18));
+  assert.ok(f.descriptions.every(p=>p.style.opacity==='0'));
+  const heightBefore=f.root.style.height,transformBefore=f.title.style.transform;
+  f.window.innerHeight+=60;f.window.listeners.resize.handler();f.flush();
+  assert.equal(f.root.style.height,heightBefore,'browser chrome must not change scroll distance');
+  assert.equal(f.title.style.transform,transformBefore);
+  f.rotate(stageHeight,screenWidth);
+  assert.equal(f.root.classes.has('is-animated'),true,'rotation preserves animation');
   f.cleanup();
 });
