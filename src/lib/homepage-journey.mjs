@@ -94,12 +94,30 @@ export function focusState(time) {
 export const titleOpacity = (time,index) => smooth((time-(11.6+index*1.65)-.18)/.24);
 
 // Smooth cubic interpolation through samples, including every career marker.
+export function simplifyLine(points,tolerance=.35) {
+  if(points.length<3)return points;
+  const keep=new Set([0,points.length-1]),pending=[[0,points.length-1]];
+  while(pending.length){
+    const [first,last]=pending.pop(),a=points[first],b=points[last];
+    const dx=b[0]-a[0],dy=b[1]-a[1],length=dx*dx+dy*dy;
+    let furthest=-1,maximum=tolerance*tolerance;
+    for(let i=first+1;i<last;i++){
+      const p=points[i],t=length?clamp(((p[0]-a[0])*dx+(p[1]-a[1])*dy)/length):0;
+      const distance=(p[0]-a[0]-t*dx)**2+(p[1]-a[1]-t*dy)**2;
+      if(distance>maximum){maximum=distance;furthest=i;}
+    }
+    if(furthest>=0){keep.add(furthest);pending.push([first,furthest],[furthest,last]);}
+  }
+  return [...keep].sort((a,b)=>a-b).map(i=>points[i]);
+}
+
 export function curvePath(points) {
-  let d=`M${points[0]}`;
+  const format=point=>point.map(n=>Math.round(n*100)/100).join(',');
+  let d=`M${format(points[0])}`;
   for(let i=0;i<points.length-1;i++){
     const a=points[i],b=points[i+1],before=points[Math.max(0,i-1)],after=points[Math.min(points.length-1,i+2)];
     const c1=a.map((n,k)=>n+(b[k]-before[k])/6),c2=b.map((n,k)=>n-(after[k]-a[k])/6);
-    d+=`C${c1} ${c2} ${b}`;
+    d+=`C${format(c1)} ${format(c2)} ${format(b)}`;
   }
   return d;
 }

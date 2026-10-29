@@ -1,5 +1,5 @@
 import boundaries from '../data/europe-boundaries.json';
-import { DURATION, clamp, smooth, diamond, projection, clipPolyline, routeMotion, focusState, titleOpacity, curvePath, viewportLayout, timelinePan } from '../lib/homepage-journey.mjs';
+import { DURATION, clamp, smooth, diamond, projection, clipPolyline, routeMotion, focusState, titleOpacity, curvePath, viewportLayout, timelinePan, simplifyLine } from '../lib/homepage-journey.mjs';
 
 export function initializeHomepage() {
   const root=document.querySelector('[data-home-scroll]');
@@ -7,6 +7,7 @@ export function initializeHomepage() {
   const stage=root.querySelector('.home-stage'),title=root.querySelector('.home-title');
   const image=root.querySelector('.home-landscape-motion'),hint=root.querySelector('.scroll-hint');
   const host=root.querySelector('.home-journey'),svg=root.querySelector('.journey-map');
+  const geography=root.querySelector('.journey-geography'),focusLayer=root.querySelector('.journey-focus');
   const links=[...root.querySelectorAll('.journey-link')];
   const markers=links.map(link=>link.querySelector('.journey-hover-marker'));
   const descriptions=[...root.querySelectorAll('.journey-description')];
@@ -30,17 +31,19 @@ export function initializeHomepage() {
     lastInk='';lastGeometry=-1;lastPaint=-1;cachedPoints=[];
     const {compact,mapHeight}=viewport;
     svg.replaceChildren();attr(svg,{viewBox:`0 0 ${width} ${viewport.vertical?Math.max(mapHeight,viewport.contentHeight):mapHeight}`});
-    const project=projection(width,mapHeight,viewport),defs=element('defs',svg);
+    geography.replaceChildren();focusLayer.replaceChildren();
+    attr(geography,{viewBox:`0 0 ${width} ${mapHeight}`});
+    const project=projection(width,mapHeight,viewport),defs=element('defs',geography);
     for(const axis of ['x','y']) {
       const gradient=element('linearGradient',defs,{id:`journey-edge-${axis}`,x2:axis==='x'?'100%':'0%',y2:axis==='y'?'100%':'0%'});
       for(const [offset,opacity] of [['0%',0],['7%',1],['93%',1],['100%',0]])element('stop',gradient,{offset,'stop-color':compact?'var(--paper)':'white','stop-opacity':compact?1-opacity:opacity});
       const mask=element('mask',defs,{id:`journey-mask-${axis}`});element('rect',mask,{width,height:mapHeight,fill:`url(#journey-edge-${axis})`});
     }
     // On phones, paper-coloured edge overlays avoid two offscreen mask surfaces.
-    const land=compact?element('g',svg):element('g',element('g',svg,{mask:'url(#journey-mask-x)'}),{mask:'url(#journey-mask-y)'});
+    const land=compact?element('g',geography):element('g',element('g',geography,{mask:'url(#journey-mask-x)'}),{mask:'url(#journey-mask-y)'});
     landGroup=land;
     strokes=boundaries.flatMap(line=>clipPolyline(line.map(project),width,mapHeight)).map(line=>{
-      let points=line;
+      let points=compact?simplifyLine(line):line;
       const closed=Math.hypot(points[0][0]-points.at(-1)[0],points[0][1]-points.at(-1)[1])<.01;
       if(closed){points.pop();let top=0;points.forEach((p,i)=>{if(p[1]<points[top][1])top=i;});points=[...points.slice(top),...points.slice(0,top)];points.push(points[0]);}
       else if(points.at(-1)[1]<points[0][1])points.reverse();
@@ -56,7 +59,8 @@ export function initializeHomepage() {
     paths=Array.from({length:3},()=>element('path',route,{class:'journey-route',pathLength:1,'stroke-dasharray':'1 1'}));
     positions=stops.map(stop=>project([stop.longitude,stop.latitude]));
     pins=positions.map(()=>element('polygon',nodes,{class:'journey-pin'}));
-    ring=element('polygon',nodes,{class:'journey-ring'});
+    // A tiny independent surface moves/scales without repainting the full-height route.
+    ring=element('polygon',focusLayer,{class:'journey-ring',points:diamond(24,24,18),'vector-effect':'non-scaling-stroke'});
     labels=stops.map((stop,i)=>{
       const [x,y]=positions[i],left=i>=2,lx=x+(left?-1:1)*(compact?12:16),ly=y+((compact?[8,-35,-70,18]:[8,-22,-50,16])[i]);
       const group=element('g',text,{class:'journey-career'});
@@ -102,7 +106,7 @@ export function initializeHomepage() {
     root.style.setProperty('--journey-step-gap',`${viewport.stepGap}px`);
     root.style.setProperty('--journey-description-top',`${viewport.descriptionTop}px`);
     mapReady=false;
-    if(!animated){svg.replaceChildren();style(title,'transform','');style(image,'transform','');style(image,'opacity','');style(image,'visibility','');style(host,'opacity','');}
+    if(!animated){svg.replaceChildren();geography.replaceChildren();focusLayer.replaceChildren();style(title,'transform','');style(image,'transform','');style(image,'opacity','');style(image,'visibility','');style(host,'opacity','');}
     const box=root.querySelector('.journey-descriptions');
     box.style.minHeight=animated?'0':`${Math.max(160,maxText)}px`;
     box.style.height=viewport.vertical?`${3*viewport.stepGap+maxText+8}px`:(animated?`${Math.min(maxText+8,viewport.descriptionHeight)}px`:'');
@@ -114,7 +118,7 @@ export function initializeHomepage() {
     if(time===lastPaint)return cachedPoints;
     lastPaint=time;
     const drawn=clamp((time-.08)/1.92)*inkLength,erased=clamp((time-5.7)/1.4)*inkLength;
-    attr(landGroup,{display:drawn>0&&erased<inkLength?'inline':'none'});
+    style(geography,'visibility',drawn>0&&erased<inkLength?'visible':'hidden');
     attr(textGroup,{display:time<7.1?'inline':'none'});
     const ink=`${drawn}:${erased}`;
     if(ink!==lastInk)strokes.forEach(s=>{
@@ -127,7 +131,8 @@ export function initializeHomepage() {
     if(geometryTime!==lastGeometry){
       const motion=routeMotion(geometryTime,width,positions,viewport);
       cachedPoints=positions.map((_,i)=>motion.point(i));
-      paths.forEach((path,i)=>attr(path,{d:geometryTime===7.05||geometryTime===10.65?`M${cachedPoints[i]}L${cachedPoints[i+1]}`:curvePath(Array.from({length:25},(_,j)=>motion.point(i+j/24)))}));
+      const samples=viewport.compact?12:24;
+      paths.forEach((path,i)=>attr(path,{d:geometryTime===7.05||geometryTime===10.65?`M${cachedPoints[i]}L${cachedPoints[i+1]}`:curvePath(Array.from({length:samples+1},(_,j)=>motion.point(i+j/samples)))}));
       lastGeometry=geometryTime;
     }
     const points=cachedPoints;
@@ -184,11 +189,12 @@ export function initializeHomepage() {
     });
     if(animated&&mapReady){
       const show=focus.index>=0&&manualIndex<0&&!manualExiting;
-      attr(ring,{opacity:show?1:0});
+      style(focusLayer,'opacity',show?'1':'0');
       if(show){
         const order=[...points].reverse(),from=order[focus.index],to=order[Math.min(3,focus.index+1)];
         const x=from[0]+(to[0]-from[0])*focus.travel,y=from[1]+(to[1]-from[1])*focus.travel;
-        attr(ring,{points:diamond(x,y,5.5+12.5*focus.growth),transform:`rotate(${focus.angle} ${x} ${y})`,'stroke-opacity':focus.growth});
+        style(focusLayer,'transform',`translate3d(${x-24}px,${y-24}px,0) rotate(${focus.angle}deg) scale(${(5.5+12.5*focus.growth)/18})`);
+        attr(ring,{'stroke-opacity':focus.growth});
         style(ring,'fill',`color-mix(in srgb,var(--ink) ${(1-focus.growth)*100}%,var(--paper))`);
       }
     }

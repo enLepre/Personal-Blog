@@ -6,7 +6,7 @@ import * as geometry from '../src/lib/homepage-journey.mjs';
 
 function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHeight=800}={}) {
   let measurements=0,now=100,pending;
-  const work={attributes:0,styles:0,curves:0,lengthReads:0,builds:0};
+  const work={attributes:0,styles:0,curves:0,samples:0,lengthReads:0,builds:0};
   class Element {
     constructor(){this.style=new Proxy({setProperty(k,v){this[k]=v;}},{set(target,key,value){work.styles++;target[key]=value;return true;}});this.attributes={};this.children=[];this.listeners={};this.inert=false;this.dataset={};this.offsetHeight=90;this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
     setAttribute(k,v){work.attributes++;this.attributes[k]=v;}
@@ -17,13 +17,13 @@ function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHe
     getComputedTextLength(){return (this.textContent||'').length*7;}
     remove(){}
   }
-  const title=new Element(),image=new Element(),hint=new Element(),host=new Element(),svg=new Element(),box=new Element();
+  const title=new Element(),image=new Element(),hint=new Element(),host=new Element(),svg=new Element(),geography=new Element(),focusLayer=new Element(),box=new Element();
   host.clientWidth=screenWidth-(screenWidth<=700?36:48);
   host.dataset.stops=JSON.stringify(['Trieste','Potsdam','Heidelberg','Zurich'].map((city,i)=>({city,longitude:[13.7768,13.0645,8.6724,8.5417][i],latitude:[45.6495,52.3906,49.3988,47.3769][i],title:'Postdoc',topic:'Chemistry'})));
   const links=Array.from({length:4},()=>{const link=new Element();link.marker=new Element();link.querySelector=()=>link.marker;return link;});
   const descriptions=Array.from({length:4},()=>new Element());
   const stage={get clientHeight(){measurements++;return stageHeight;}};
-  const elements={'.home-stage':stage,'.home-title':title,'.home-landscape-motion':image,'.scroll-hint':hint,'.home-journey':host,'.journey-map':svg,'.journey-descriptions':box};
+  const elements={'.home-stage':stage,'.home-title':title,'.home-landscape-motion':image,'.scroll-hint':hint,'.home-journey':host,'.journey-map':svg,'.journey-geography':geography,'.journey-focus':focusLayer,'.journey-descriptions':box};
   const root=new Element();root.querySelector=s=>elements[s];root.querySelectorAll=s=>s==='.journey-link'?links:descriptions;
   root.getBoundingClientRect=()=>{measurements++;return {top:-window.scrollY};};
   const window=new Element();window.scrollY=0;window.innerWidth=screenWidth;window.innerHeight=stageHeight;
@@ -31,14 +31,14 @@ function fixture({reduced=false,mobile=false,screenWidth=mobile?390:1024,stageHe
   const media=new Element();media.matches=reduced;
   const source=readFileSync('src/scripts/homepage-journey.js','utf8').replace(/^import .*;\r?\n/gm,'').replace('export function','function');
   const cleanup=vm.runInNewContext(source+';initializeHomepage();',{
-    ...geometry,curvePath(points){work.curves++;return geometry.curvePath(points);},boundaries:JSON.parse(readFileSync('src/data/europe-boundaries.json','utf8')),document,window,AbortController,
+    ...geometry,curvePath(points){work.curves++;work.samples+=points.length;return geometry.curvePath(points);},boundaries:JSON.parse(readFileSync('src/data/europe-boundaries.json','utf8')),document,window,AbortController,
     performance:{now:()=>now},matchMedia:()=>media,ResizeObserver:class{observe(){}disconnect(){}},
     requestAnimationFrame(callback){pending=callback;return 1;},cancelAnimationFrame(){pending=undefined;}
   });
   const flush=()=>{for(let i=0;pending&&i<100;i++){const cb=pending;pending=undefined;now+=20;cb(now);}assert.equal(pending,undefined,'animation settles without an idle loop');};
   const scrollTo=value=>{window.scrollY=value;window.listeners.scroll.handler();flush();};
   const event=(index,name)=>{links[index].listeners[name].handler({pointerType:'mouse'});flush();};
-  return {root,links,descriptions,title,image,window,host,svg,work,cleanup,flush,scrollTo,event,measurements:()=>measurements,
+  return {root,links,descriptions,title,image,window,host,svg,geography,focusLayer,work,cleanup,flush,scrollTo,event,measurements:()=>measurements,
     rotate(w,h){window.innerWidth=w;window.innerHeight=h;stageHeight=h;host.clientWidth=w-(w<=700?36:48);window.listeners.resize.handler();flush();}};
 }
 for(const mobile of [false,true])test(`map work is bounded to its visible animation, mobile=${mobile}`,()=>{
@@ -47,14 +47,15 @@ for(const mobile of [false,true])test(`map work is bounded to its visible animat
   const distance=parseFloat(f.root.style.height)-800*2.2;
   const seek=time=>f.scrollTo(960+distance*time/19);
   seek(1);
-  assert.equal(f.work.builds,1);
+  assert.equal(f.work.builds,3);
   const flatten=node=>[node,...node.children.flatMap(flatten)];
-  const masks=flatten(f.svg).filter(node=>node.attributes.mask);
+  const masks=flatten(f.geography).filter(node=>node.attributes.mask);
   assert.equal(masks.length,mobile?0:2,'phone map avoids nested rendering masks');
   assert.equal(f.work.lengthReads,0,'polyline length requires no SVG layout reads');
   assert.equal(f.work.curves,0,'initial straight connections need no curve sampling');
   seek(8);
   assert.equal(f.work.curves,3,'morph computes one curve per connection');
+  assert.equal(f.work.samples,mobile?39:75,'phone curve uses fewer control samples');
   seek(19);
   assert.equal(f.host.style.clipPath,undefined,'panning does not repaint an animated clip-path');
   if(mobile)assert.match(f.host.style.transform,/translate3d/);
@@ -67,8 +68,44 @@ for(const mobile of [false,true])test(`map work is bounded to its visible animat
   seek(8);
   assert.equal(f.work.curves,curves+3,'reverse scrolling restores curved geometry');
   seek(1);
-  assert.equal(f.work.builds,1,'reverse scrolling reuses the same map');
+  assert.equal(f.work.builds,3,'reverse scrolling reuses the same map');
   f.cleanup();
+});
+
+test('selection movement leaves the large drawing surfaces unchanged',()=>{
+  const f=fixture({mobile:true});
+  const distance=parseFloat(f.root.style.height)-800*2.2;
+  const seek=time=>f.scrollTo(960+distance*time/19);
+  const drawing=node=>({attributes:node.attributes,children:node.children.map(drawing)});
+  seek(12.2);
+  const before=JSON.stringify([drawing(f.svg),drawing(f.geography)]);
+  const selection=f.focusLayer.style.transform;
+  seek(13.85);
+  assert.equal(JSON.stringify([drawing(f.svg),drawing(f.geography)]),before);
+  assert.notEqual(f.focusLayer.style.transform,selection);
+  assert.equal(f.focusLayer.children.length,1,'selection uses only one small polygon');
+  f.cleanup();
+});
+
+test('phone coastline simplification stays within 0.35 screen pixels',t=>{
+  const boundaries=JSON.parse(readFileSync('src/data/europe-boundaries.json','utf8'));
+  const viewport=geometry.viewportLayout(354,844,90),project=geometry.projection(354,viewport.mapHeight,viewport);
+  let original=0,simplified=0;
+  for(const line of boundaries.flatMap(line=>geometry.clipPolyline(line.map(project),354,viewport.mapHeight))){
+    const result=geometry.simplifyLine(line);
+    original+=line.length;simplified+=result.length;
+    assert.deepEqual(result[0],line[0]);assert.deepEqual(result.at(-1),line.at(-1));
+    for(const point of line){
+      const distance=Math.min(...result.slice(1).map((b,i)=>{
+        const a=result[i],dx=b[0]-a[0],dy=b[1]-a[1],length=dx*dx+dy*dy;
+        const u=length?geometry.clamp(((point[0]-a[0])*dx+(point[1]-a[1])*dy)/length):0;
+        return Math.hypot(point[0]-a[0]-u*dx,point[1]-a[1]-u*dy);
+      }));
+      assert.ok(distance<=.350001);
+    }
+  }
+  assert.ok(simplified<original);
+  t.diagnostic(`Phone coastline vertices: ${original} → ${simplified}`);
 });
 
 test('scroll reuses geometry measurements, reveals navigation, and ends empty',()=>{
@@ -108,8 +145,8 @@ for(const [screenWidth,stageHeight] of [[320,568],[375,667],[390,844],[430,932],
   f.scrollTo(stageHeight*1.2+distance*12.2/19);
   assert.equal(f.descriptions[0].style.opacity,'1');
   const findRing=node=>node.attributes?.class==='journey-ring'?node:node.children?.map(findRing).find(Boolean);
-  const ring=findRing(f.svg);
-  const center=()=>{const points=ring.attributes.points.split(' ').map(pair=>pair.split(',').map(Number));return [points.reduce((sum,p)=>sum+p[0],0)/4,points.reduce((sum,p)=>sum+p[1],0)/4];};
+  const ring=findRing(f.focusLayer);
+  const center=()=>{const match=f.focusLayer.style.transform.match(/translate3d\(([-\d.]+)px,([-\d.]+)px/);return [Number(match[1])+24,Number(match[2])+24];};
   const researchPosition=center();
   assert.ok(Math.abs(researchPosition[0]-24)<.001);
   assert.ok(Math.abs(researchPosition[1]-28)<.001,'first menu node starts at the top');
